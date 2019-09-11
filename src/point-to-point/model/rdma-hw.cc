@@ -391,6 +391,7 @@ int RdmaHw::ReceiveAck(Ptr<Packet> p, CustomHeader &ch){
 			qp->Acknowledge(goback_seq);
 		}
 		if (qp->IsFinished()){
+			std::cout<<"Finished flow at "<<qp->sip<<" dst "<<qp->dst<<" in time "<<Simulator::Now()-starting_times<<" port "<<qp->sport<<" Size "<<qp->m_size<<" \n";
 			QpComplete(qp);
 		}
 	}
@@ -432,6 +433,10 @@ int RdmaHw::Receive(Ptr<Packet> p, CustomHeader &ch){
 int RdmaHw::ReceiverCheckSeq(uint32_t seq, Ptr<RdmaRxQueuePair> q, uint32_t size){
 	uint32_t expected = q->ReceiverNextExpectedSeq;
 	if (seq == expected){
+		if(seq>=q->m_size)
+		{
+			std::cout<<"Received flow "<<qp->sip<<" dst "<<qp->dip<<" port "<<qp->sport<<" Time "<<Simulator::Now()<<" Size "<<qp->m_size;<<"\n";
+		}
 		q->ReceiverNextExpectedSeq = expected + size;
 		if (q->ReceiverNextExpectedSeq >= q->m_milestone_rx){
 			q->m_milestone_rx += m_ack_interval;
@@ -523,6 +528,11 @@ Ptr<Packet> RdmaHw::GetNxtPacket(Ptr<RdmaQueuePair> qp){
 	Ptr<Packet> p = Create<Packet> (payload_size);
 	// add SeqTsHeader
 	SeqTsHeader seqTs;
+	if(qp->snd_nxt==0)
+	{
+		std::cout<<"Started flow "<<qp->sip<<" dst "<<qp->dip<<" port "<<qp->sport<<" Time "<<Simulator::Now()<<" Size "<<qp->m_size;<<"\n";
+		starting_times = Simulator::Now();
+	}
 	seqTs.SetSeq (qp->snd_nxt);
 	seqTs.SetPG (qp->m_pg);
 	p->AddHeader (seqTs);

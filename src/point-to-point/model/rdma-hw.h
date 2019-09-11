@@ -26,6 +26,8 @@ public:
 	static TypeId GetTypeId (void);
 	RdmaHw();
 
+	Time starting_times;
+
 	Ptr<Node> m_node;
 	DataRate m_minRate;		//< Min sending rate
 	uint32_t m_mtu;

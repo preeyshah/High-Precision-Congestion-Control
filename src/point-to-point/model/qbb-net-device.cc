@@ -200,6 +200,8 @@ namespace ns3 {
 		return tid;
 	}
 
+	uint32_t k = 0;
+
 	QbbNetDevice::QbbNetDevice()
 	{
 		NS_LOG_FUNCTION(this);
@@ -209,6 +211,9 @@ namespace ns3 {
 		}
 
 		m_rdmaEQ = CreateObject<RdmaEgressQueue>();
+		qbbid = k;
+		k++;
+		Simulator::Schedule(MicroSeconds(1000010), &QbbNetDevice::PrintStatistics, this);
 	}
 
 	QbbNetDevice::~QbbNetDevice()
@@ -222,6 +227,23 @@ namespace ns3 {
 		NS_LOG_FUNCTION(this);
 
 		PointToPointNetDevice::DoDispose();
+	}
+
+	void QbbNetDevice::PrintStats()
+	{
+		if (m_node->GetNodeType() == 1)
+		{
+			std::cout<<"Stats "<<qbbid<<" Time "<<Simulator::Now()<<" "
+			for(int i=0; i< qCnt;i++)
+			{
+				if(m_paused[i])
+				{
+					std::cout<<"P-"<<i<<" ";
+				}
+			}
+			std::cout<<"\n";
+			Simulator::Schedule(Microseconds(5), &QbbNetDevice::PrintStats, this);
+		}
 	}
 
 	void

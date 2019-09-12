@@ -130,6 +130,10 @@ public:
    void ReassignedQp(Ptr<RdmaQueuePair> qp);
    void TriggerTransmit(void);
 
+   void PrintStats();
+
+   uint32_t qbbid;
+
 	void SendPfc(uint32_t qIndex, uint32_t type); // type: 0 = pause, 1 = resume
 
 	TracedCallback<Ptr<const Packet>, uint32_t> m_traceEnqueue;

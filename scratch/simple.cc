@@ -90,7 +90,7 @@ string qlen_mon_file;
 
 double sigma = 2.0;
 
-uint32_t datarate = 10;
+uint32_t datarate = 100;
 
 double app_stop_time = 2.05;
 
@@ -830,8 +830,32 @@ int main(int argc, char *argv[])
 }
 else if(conga)
 {
-	enterprise_size = enterprise_size_conga;
-	enterprise_prob = enterprise_prob_conga;
+	std::ifstream workload;
+	workload.open("mix/w4.txt");
+
+	if (!workload) {
+    std::cerr << "Unable to open file w4.txt";
+    exit(1);   // call system to stop
+	}
+	int size;
+	double cdf=0.0;
+	//std::cout<<"New file--------\n";
+	int index = 0;
+	while (workload >> size) {
+		workload >> cdf;
+		//std::cout<<size<<" "<<cdf<<"\n";
+  		if(size>min_size)
+  			{
+  				enterprise_size.push_back(size);
+  				enterprise_prob.push_back(cdf);
+  			}
+  			else{
+  				enterprise_size.push_back(size);
+  				enterprise_prob.push_back(0.0);
+  			}
+  		index++;
+	}
+	workload.close();
 }
 else if(w_dctcp)
 {
@@ -853,11 +877,11 @@ for (int i = 1; i < enterprise_size.size(); i++) {
 
 	
 	std::cout<<"Utilization Factor (including incast, if there) "<<utilization_factor<<"\n";
-	double flow_rate= 32 * datarate * 1000000000.0 * utilization_factor;//in Bits/s
+	double flow_rate= 64 * datarate * 1000000000.0 * utilization_factor;//in Bits/s
 //double flow_rate= 0.5 * 10 * 1000000000.0 * 0.6;//in Bits/s
 	if(create_incast)
 	{
-		flow_rate -= 32*datarate*1000000000.0 *0.05;
+		flow_rate -= 64*datarate*1000000000.0 *0.05;
 	}
 	double flows_per_sec = flow_rate / (avg_flow_size * 8.0);
 
@@ -902,7 +926,7 @@ for (int i = 1; i < enterprise_size.size(); i++) {
 		double error_rate =  0.0;
 		// double error_rate;
 		// topof >> src >> dst >> data_rate >> link_delay >> error_rate;
-		data_rate = "10Gbps";
+		data_rate = "100Gbps";
 		link_delay = "0.001ms";
 		uint32_t end_num = 128;
 		if (i < end_num) {
@@ -1146,7 +1170,7 @@ for (int i = 1; i < enterprise_size.size(); i++) {
     //for (uint32_t i = 0; i < flow_num; i++)
     uint32_t flownum=0;
     
-    uint32_t num_of_incasts = (app_stop_time-app_start_time)*32*datarate*1000000000.0*0.05/(packet_size_incast*packetSize*num_sources*8.0);
+    uint32_t num_of_incasts = (app_stop_time-app_start_time)*64*datarate*1000000000.0*0.05/(packet_size_incast*packetSize*num_sources*8.0);
     uint32_t incasts_done = 0;
     double incast_interval = (app_stop_time-app_start_time)/num_of_incasts;
     if(create_incast)

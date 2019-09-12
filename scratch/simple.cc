@@ -88,7 +88,7 @@ uint32_t qlen_dump_interval = 100000000, qlen_mon_interval = 100;
 uint64_t qlen_mon_start = 2000000000, qlen_mon_end = 2100000000;
 string qlen_mon_file;
 
-double sigma = 2.0
+double sigma = 2.0;
 
 uint32_t datarate = 10;
 
@@ -1256,6 +1256,7 @@ else if(w_dctcp)
 	        	}
 	        }
         }
+        double x;
         if(poison_distr)
         {
         	x = exp_dis(gen);

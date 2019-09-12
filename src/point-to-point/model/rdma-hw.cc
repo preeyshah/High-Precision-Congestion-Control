@@ -433,10 +433,10 @@ int RdmaHw::Receive(Ptr<Packet> p, CustomHeader &ch){
 int RdmaHw::ReceiverCheckSeq(uint32_t seq, Ptr<RdmaRxQueuePair> q, uint32_t size){
 	uint32_t expected = q->ReceiverNextExpectedSeq;
 	if (seq == expected){
-		if(seq>=q->m_size)
-		{
-			std::cout<<"Received flow "<<q->sip<<" dst "<<q->dip<<" port "<<q->sport<<" Time "<<Simulator::Now()<<" Size "<<q->m_size<<"\n";
-		}
+		// if(seq>=q->m_size)
+		// {
+		// 	std::cout<<"Received flow "<<q->sip<<" dst "<<q->dip<<" port "<<q->sport<<" Time "<<Simulator::Now()<<" Size "<<q->m_size<<"\n";
+		// }
 		q->ReceiverNextExpectedSeq = expected + size;
 		if (q->ReceiverNextExpectedSeq >= q->m_milestone_rx){
 			q->m_milestone_rx += m_ack_interval;
@@ -530,7 +530,7 @@ Ptr<Packet> RdmaHw::GetNxtPacket(Ptr<RdmaQueuePair> qp){
 	SeqTsHeader seqTs;
 	if(qp->snd_nxt==0)
 	{
-		std::cout<<"Started flow "<<qp->sip<<" dst "<<qp->dip<<" port "<<qp->sport<<" Time "<<Simulator::Now()<<" Size "<<qp->m_size;<<"\n";
+		std::cout<<"Started flow "<<qp->sip<<" dst "<<qp->dip<<" port "<<qp->sport<<" Time "<<Simulator::Now()<<" Size "<<qp->m_size<<"\n";
 		starting_times = Simulator::Now();
 	}
 	seqTs.SetSeq (qp->snd_nxt);

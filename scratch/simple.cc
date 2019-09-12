@@ -774,23 +774,7 @@ int main(int argc, char *argv[])
 	// flowf >> flow_num;
 	// tracef >> trace_num;
 
-	double avg_flow_size=0;//in Bytes
-for (int i = 1; i < enterprise_size.size(); i++) {
-	avg_flow_size += (enterprise_prob[i] - enterprise_prob[i - 1]) * ((enterprise_size[i] + enterprise_size[i - 1]) / 2.0);
-}	
-
-
-	std::cout<<" Avg flow size "<<avg_flow_size<<"\n";
-
 	
-	std::cout<<"Utilization Factor (including incast, if there) "<<utilization_factor<<"\n";
-	double flow_rate= 32 * datarate * 1000000000.0 * utilization_factor;//in Bits/s
-//double flow_rate= 0.5 * 10 * 1000000000.0 * 0.6;//in Bits/s
-	if(create_incast)
-	{
-		flow_rate -= 32*datarate*1000000000.0 *0.05;
-	}
-	double flows_per_sec = flow_rate / (avg_flow_size * 8.0);
 
 	node_num = 144;
 	switch_num = 16;
@@ -859,6 +843,23 @@ for(int i=0;i<enterprise_size.size();i++)
 	probs.insert(enterprise_prob[i]);
 	size_map[enterprise_prob[i]]= enterprise_size[i];
 }
+double avg_flow_size=0;//in Bytes
+for (int i = 1; i < enterprise_size.size(); i++) {
+	avg_flow_size += (enterprise_prob[i] - enterprise_prob[i - 1]) * ((enterprise_size[i] + enterprise_size[i - 1]) / 2.0);
+}	
+
+
+	std::cout<<" Avg flow size "<<avg_flow_size<<"\n";
+
+	
+	std::cout<<"Utilization Factor (including incast, if there) "<<utilization_factor<<"\n";
+	double flow_rate= 32 * datarate * 1000000000.0 * utilization_factor;//in Bits/s
+//double flow_rate= 0.5 * 10 * 1000000000.0 * 0.6;//in Bits/s
+	if(create_incast)
+	{
+		flow_rate -= 32*datarate*1000000000.0 *0.05;
+	}
+	double flows_per_sec = flow_rate / (avg_flow_size * 8.0);
 
 	NS_LOG_INFO("Create nodes.");
 

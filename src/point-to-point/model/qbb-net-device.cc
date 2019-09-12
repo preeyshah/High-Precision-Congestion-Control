@@ -242,7 +242,7 @@ namespace ns3 {
 				}
 			}
 			std::cout<<"\n";
-			Simulator::Schedule(Microseconds(5), &QbbNetDevice::PrintStats, this);
+			Simulator::Schedule(MicroSeconds(5), &QbbNetDevice::PrintStats, this);
 		}
 	}
 

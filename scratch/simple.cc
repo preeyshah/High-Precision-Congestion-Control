@@ -854,6 +854,11 @@ else if(w_dctcp)
 	enterprise_size = enterprise_size_dctcp;
 	enterprise_prob = enterprise_prob_dctcp;
 }
+for(int i=0;i<enterprise_size.size();i++)
+{
+	probs.insert(enterprise_prob[i]);
+	size_map[enterprise_prob[i]]= enterprise_size[i];
+}
 
 	NS_LOG_INFO("Create nodes.");
 

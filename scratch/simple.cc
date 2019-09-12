@@ -88,6 +88,8 @@ uint32_t qlen_dump_interval = 100000000, qlen_mon_interval = 100;
 uint64_t qlen_mon_start = 2000000000, qlen_mon_end = 2100000000;
 string qlen_mon_file;
 
+double sigma = 2.0
+
 uint32_t datarate = 10;
 
 double app_stop_time = 2.05;
@@ -800,7 +802,7 @@ for (int i = 1; i < enterprise_size.size(); i++) {
 	for (uint32_t i = 0; i < switch_num; i++)
 	{
 		uint32_t sid;
-		topof >> sid;
+		sid = i;
 		node_type[sid] = 1;
 	}
 	for (uint32_t i = 0; i < node_num; i++){

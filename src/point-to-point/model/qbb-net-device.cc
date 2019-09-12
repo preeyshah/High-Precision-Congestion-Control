@@ -213,7 +213,7 @@ namespace ns3 {
 		m_rdmaEQ = CreateObject<RdmaEgressQueue>();
 		qbbid = k;
 		k++;
-		Simulator::Schedule(MicroSeconds(1000010), &QbbNetDevice::PrintStatistics, this);
+		Simulator::Schedule(MicroSeconds(1000010), &QbbNetDevice::PrintStats, this);
 	}
 
 	QbbNetDevice::~QbbNetDevice()
@@ -233,7 +233,7 @@ namespace ns3 {
 	{
 		if (m_node->GetNodeType() == 1)
 		{
-			std::cout<<"Stats "<<qbbid<<" Time "<<Simulator::Now()<<" "
+			std::cout<<"Stats "<<qbbid<<" Time "<<Simulator::Now()<<" ";
 			for(int i=0; i< qCnt;i++)
 			{
 				if(m_paused[i])

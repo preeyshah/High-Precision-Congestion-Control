@@ -90,7 +90,7 @@ string qlen_mon_file;
 
 uint32_t datarate = 10;
 
-
+double app_stop_time = 2.05;
 
 unordered_map<uint64_t, uint32_t> rate2kmax, rate2kmin;
 unordered_map<uint64_t, double> rate2pmax;
@@ -723,6 +723,13 @@ int main(int argc, char *argv[])
 				conf >> v;
 				utilization_factor = v;
 				std::cout << "UTILIZATION_FACTOR\t\t\t" << utilization_factor << "\n";
+			}
+			else if (key.compare("APP_STOP_TIME") == 0)
+			{
+				double v;
+				conf >> v;
+				app_stop_time = v;
+				std::cout << "SINK_STOP_TIME\t\t\t" << app_stop_time << "\n";
 			}
 			fflush(stdout);
 		}

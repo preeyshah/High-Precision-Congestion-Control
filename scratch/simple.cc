@@ -767,7 +767,7 @@ int main(int argc, char *argv[])
 	// topof.open(topology_file.c_str());
 	// flowf.open(flow_file.c_str());
 	// tracef.open(trace_file.c_str());
-	// uint32_t node_num, switch_num, link_num, flow_num, trace_num;
+	uint32_t node_num, switch_num, link_num, flow_num, trace_num;
 	// topof >> node_num >> switch_num >> link_num;
 	// flowf >> flow_num;
 	// tracef >> trace_num;
@@ -891,6 +891,7 @@ else if(w_dctcp)
 	{
 		uint32_t src, dst;
 		std::string data_rate, link_delay;
+		double error_rate =  0.0;
 		// double error_rate;
 		// topof >> src >> dst >> data_rate >> link_delay >> error_rate;
 		data_rate = "10Gbps";
@@ -1220,7 +1221,7 @@ else if(w_dctcp)
 		RdmaClientHelper clientHelper(pg, serverAddress[src], serverAddress[dst], port, 40000+dst, maxPacketCount*flow_packet_size, has_win?(global_t==1?maxBdp:pairBdp[n.Get(src)][n.Get(dst)]):0, global_t==1?maxRtt:pairRtt[n.Get(src)][n.Get(dst)]);
 		ApplicationContainer appCon = clientHelper.Install(n.Get(src));
 		appCon.Start(Seconds(start_time));
-		appCon.Stop(Seconds(stop_time));
+		appCon.Stop(Seconds(app_stop_time));
 		if(create_incast)
         {
         	if((uint32_t)((start_time- app_start_time)/(incast_interval))>incasts_done)
@@ -1249,7 +1250,7 @@ else if(w_dctcp)
 		RdmaClientHelper clientHelper(pg, serverAddress[src], serverAddress[dst], port, 40000+dst, maxPacketCount*flow_packet_size, has_win?(global_t==1?maxBdp:pairBdp[n.Get(src)][n.Get(dst)]):0, global_t==1?maxRtt:pairRtt[n.Get(src)][n.Get(dst)]);
 		ApplicationContainer appCon = clientHelper.Install(n.Get(src));
 		appCon.Start(Seconds(start_time));
-		appCon.Stop(Seconds(stop_time));
+		appCon.Stop(Seconds(app_stop_time));
 	        	}
 	        }
         }
@@ -1272,9 +1273,9 @@ else if(w_dctcp)
 	}
 
 
-	topof.close();
-	flowf.close();
-	tracef.close();
+	// topof.close();
+	// flowf.close();
+	// tracef.close();
 
 	// schedule link down
 	if (link_down_time > 0){
@@ -1295,7 +1296,7 @@ else if(w_dctcp)
 	Simulator::Run();
 	Simulator::Destroy();
 	NS_LOG_INFO("Done.");
-	fclose(trace_output);
+	//fclose(trace_output);
 
 	endt = clock();
 	std::cout << (double)(endt - begint) / CLOCKS_PER_SEC << "\n";

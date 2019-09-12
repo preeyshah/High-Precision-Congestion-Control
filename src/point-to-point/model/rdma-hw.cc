@@ -391,7 +391,7 @@ int RdmaHw::ReceiveAck(Ptr<Packet> p, CustomHeader &ch){
 			qp->Acknowledge(goback_seq);
 		}
 		if (qp->IsFinished()){
-			std::cout<<"Finished flow at "<<qp->sip<<" dst "<<qp->dst<<" in time "<<Simulator::Now()-starting_times<<" port "<<qp->sport<<" Size "<<qp->m_size<<" \n";
+			std::cout<<"Finished flow at "<<qp->sip<<" dst "<<qp->dip<<" in time "<<Simulator::Now()-starting_times<<" port "<<qp->sport<<" Size "<<qp->m_size<<" \n";
 			QpComplete(qp);
 		}
 	}
@@ -435,7 +435,7 @@ int RdmaHw::ReceiverCheckSeq(uint32_t seq, Ptr<RdmaRxQueuePair> q, uint32_t size
 	if (seq == expected){
 		if(seq>=q->m_size)
 		{
-			std::cout<<"Received flow "<<qp->sip<<" dst "<<qp->dip<<" port "<<qp->sport<<" Time "<<Simulator::Now()<<" Size "<<qp->m_size;<<"\n";
+			std::cout<<"Received flow "<<q->sip<<" dst "<<q->dip<<" port "<<q->sport<<" Time "<<Simulator::Now()<<" Size "<<q->m_size<<"\n";
 		}
 		q->ReceiverNextExpectedSeq = expected + size;
 		if (q->ReceiverNextExpectedSeq >= q->m_milestone_rx){

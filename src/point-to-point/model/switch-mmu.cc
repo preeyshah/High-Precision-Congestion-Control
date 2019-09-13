@@ -44,7 +44,7 @@ namespace ns3 {
 		
 	}
 
-	void SwitchMmu::SetSwitch(uint32_t sw_id){
+	void SwitchMmu::SetSwitch(uint32_t i){
 		is_switch = true;
 		sw_id = i;
 		

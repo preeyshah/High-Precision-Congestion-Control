@@ -75,16 +75,19 @@ for i in range(len(filedata)):
 		try:
 			finished += 1
 			sep = filedata[i].split(' ')
-			src =int((sep[3].split('.'))[1])
+			#src =int((sep[3].split('.'))[1])
 			print('src')
-			dst = int((sep[5].split('.'))[1])
+			#dst = int((sep[5].split('.'))[1])
 			print('dst')
 			time = int(((sep[8].split('.'))[0]).split('+')[1])
-			print('time')
+			#print('time')
 			size = int(sep[12])
-			print('size')
+			#print('size')
 			ld = 8000
 			ex = 3
+			np = int(size/1000)
+			if size < 1000:
+				np = 1
 			if int((src-1)/16)==int((dst-1)/16):
 				ld = 4000
 				ex =1
@@ -92,7 +95,7 @@ for i in range(len(filedata)):
 			base_time = ld+(size*8.0/datarate)*(np+ex)
 			ratio = time*1.0/base_time
 			
-			arr.append([int(size/1000),time, ratio])
+			arr.append([np,time, ratio])
 		except:
 			continue
 	elif filedata[i][0:7]=='Started':

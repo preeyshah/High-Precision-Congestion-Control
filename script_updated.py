@@ -75,10 +75,10 @@ for i in range(len(filedata)):
 		try:
 			finished += 1
 			sep = filedata[i].split(' ')
-			#src =int((sep[3].split('.'))[1])
-			print('src')
-			#dst = int((sep[5].split('.'))[1])
-			print('dst')
+			src =int((sep[3].split('.'))[1])
+			#print('src')
+			dst = int((sep[5].split('.'))[1])
+			#print('dst')
 			time = int(((sep[8].split('.'))[0]).split('+')[1])
 			#print('time')
 			size = int(sep[12])

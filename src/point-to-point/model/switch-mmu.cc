@@ -33,6 +33,7 @@ namespace ns3 {
 		memset(ingress_bytes, 0, sizeof(ingress_bytes));
 		memset(paused, 0, sizeof(paused));
 		memset(egress_bytes, 0, sizeof(egress_bytes));
+		Simulator::Schedule(MicroSeconds(1000000),&SwitchMmu::PrintStats, this);
 	}
 
 	void SwitchMmu::PrintStats(){

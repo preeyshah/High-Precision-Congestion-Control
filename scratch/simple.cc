@@ -1285,6 +1285,8 @@ for (int i = 1; i < enterprise_size.size(); i++) {
 	       			
 	       			NS_ASSERT(n.Get(src)->GetNodeType() == 0 && n.Get(dst)->GetNodeType() == 0);
 		port = portNumder[src]++; // get a new port number 
+		port = port%65000;
+		if(port<10000) port+= 30000;
 		RdmaClientHelper clientHelper(pg, serverAddress[src], serverAddress[dst], port, 40000+dst, maxPacketCount*packetSize, has_win?(global_t==1?maxBdp:pairBdp[n.Get(src)][n.Get(dst)]):0, global_t==1?maxRtt:pairRtt[n.Get(src)][n.Get(dst)]);
 		ApplicationContainer appCon = clientHelper.Install(n.Get(src));
 		appCon.Start(Seconds(start_time));

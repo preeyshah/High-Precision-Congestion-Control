@@ -41,6 +41,12 @@ public:
 	void ConfigNPort(uint32_t n_port);
 	void ConfigBufferSize(uint32_t size);
 
+	void PrintStats();
+	void SetSwitch(uint32_t i);
+
+	bool is_switch;
+	uint32_t sw_id;
+
 	// config
 	uint32_t node_id;
 	uint32_t buffer_size;

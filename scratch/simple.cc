@@ -797,6 +797,7 @@ int main(int argc, char *argv[])
 			Ptr<SwitchNode> sw = CreateObject<SwitchNode>();
 			n.Add(sw);
 			sw->SetAttribute("EcnEnabled", BooleanValue(enable_qcn));
+			//sw->SetSwitch(i);
 		}
 	}
 
@@ -1032,6 +1033,8 @@ for (int i = 1; i < enterprise_size.size(); i++) {
 			sw->m_mmu->ConfigNPort(sw->GetNDevices()-1);
 			sw->m_mmu->ConfigBufferSize(buffer_size* 1024 * 1024);
 			sw->m_mmu->node_id = sw->GetId();
+			sw->m_mmu->node_id = sw->GetId();
+			sw->m_mmu->SetSwitch(i);
 		}
 	}
 
@@ -1282,7 +1285,7 @@ for (int i = 1; i < enterprise_size.size(); i++) {
 	       			
 	       			NS_ASSERT(n.Get(src)->GetNodeType() == 0 && n.Get(dst)->GetNodeType() == 0);
 		port = portNumder[src]++; // get a new port number 
-		RdmaClientHelper clientHelper(pg, serverAddress[src], serverAddress[dst], port, 40000+dst, maxPacketCount*flow_packet_size, has_win?(global_t==1?maxBdp:pairBdp[n.Get(src)][n.Get(dst)]):0, global_t==1?maxRtt:pairRtt[n.Get(src)][n.Get(dst)]);
+		RdmaClientHelper clientHelper(pg, serverAddress[src], serverAddress[dst], port, 40000+dst, maxPacketCount*packetSize, has_win?(global_t==1?maxBdp:pairBdp[n.Get(src)][n.Get(dst)]):0, global_t==1?maxRtt:pairRtt[n.Get(src)][n.Get(dst)]);
 		ApplicationContainer appCon = clientHelper.Install(n.Get(src));
 		appCon.Start(Seconds(start_time));
 		appCon.Stop(Seconds(app_stop_time));

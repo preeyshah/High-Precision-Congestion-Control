@@ -76,12 +76,16 @@ for i in range(len(filedata)):
 			finished += 1
 			sep = filedata[i].split(' ')
 			src =int((sep[3].split('.'))[1])
+			print('src')
 			dst = int((sep[5].split('.'))[1])
+			print('dst')
 			time = int(((sep[8].split('.'))[0]).split('+')[1])
+			print('time')
 			size = int(sep[12])
+			print('size')
 			ld = 8000
 			ex = 3
-			if int((src-1)/16)= int((dst-1)/16):
+			if int((src-1)/16)==int((dst-1)/16):
 				ld = 4000
 				ex =1
 
@@ -200,87 +204,3 @@ percentiles = [0.0 for _ in range(n)]
 percentiles_95 = [0.0 for _ in range(n)]
 vals = [[] for _ in range(n)]
 
-for i in range(len(arr2)):
-	j = -1
-	if not is_w3:
-		if arr2[i][0]==Incast_size:
-			j = 9
-		elif arr2[i][0] <= 3:
-			j = 0
-		elif arr2[i][0] <= 12:
-			j = 1
-		elif arr2[i][0] <= 48:
-			j = 2
-		elif arr2[i][0] <= 192:
-			j = 3
-		elif arr2[i][0] <= 768:
-			j = 4
-		elif arr2[i][0] <= 3072:
-			j = 5
-		elif arr2[i][0] <= 12288:
-			j = 6
-		elif arr2[i][0] <= 49152:
-			j = 7
-		else:
-			j = 8
-
-	else:
-		if arr2[i][0]==Incast_size:
-			j = 9
-		elif arr2[i][0] <= 1:
-			j = 0
-		elif arr2[i][0] <= 2:
-			j = 1
-		elif arr2[i][0] <= 4:
-			j = 2
-		elif arr2[i][0] <= 8:
-			j = 3
-		elif arr2[i][0] <= 16:
-			j = 4
-		elif arr2[i][0] <= 64:
-			j = 5
-		elif arr2[i][0] <= 256:
-			j = 6
-		elif arr2[i][0] <= 1024:
-			j = 7
-		else:
-			j = 8		
-	nums[j] +=1
-	sums[j] +=arr2[i][2]
-	vals[j].append(arr2[i][2])
-	# if arr[i][2] >= 10000:
-	# 	print(j)
-	# 	print(arr[i][1])
-	# 	print("-----")
-
-for i in range(len(medians)):
-	if nums[i] != 0:
-		s = sort(array(vals[i]))
-		percentiles[i] = s[int(99.0/100.0*nums[i])]
-		percentiles_95[i] = s[int(95.0/100.0*nums[i])]
-		medians[i] = s[int(nums[i]/2)]
-		avgs[i] = sums[i]/nums[i]
-		maxims[i] = s[int(nums[i]-1)]
-		#print(s)
-		# print(len(s))
-
-
-print("Flows started", end=" ")
-print(started)
-print("Flows completed", end=" ")
-print(finished)
-print("nums =", end=" ")
-print(nums)
-print("averages =", end=" ")
-print(avgs)
-print("medians =", end = " ")
-print(medians)
-print("95 percentile =", end=" ")
-print(percentiles_95)
-print("99 percentile =", end=" ")
-print(percentiles)
-print("Maximum =", end=" ")
-print(maxims)
-#os.system('rm temp1')
-print(failed)
-print(completed)

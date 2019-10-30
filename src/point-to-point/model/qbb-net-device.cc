@@ -233,15 +233,15 @@ namespace ns3 {
 	{
 		if (m_node->GetNodeType() == 1)
 		{
-			std::cout<<"Stats "<<qbbid<<" Time "<<Simulator::Now()<<" ";
+			//std::cout<<"Stats "<<qbbid<<" Time "<<Simulator::Now()<<" ";
 			for(int i=0; i< qCnt;i++)
 			{
 				if(m_paused[i])
 				{
-					std::cout<<"P-"<<i<<" ";
+				//	std::cout<<"P-"<<i<<" ";
 				}
 			}
-			std::cout<<"\n";
+			//std::cout<<"\n";
 			Simulator::Schedule(MicroSeconds(5), &QbbNetDevice::PrintStats, this);
 		}
 	}

@@ -172,6 +172,7 @@ public:
   virtual bool IsPointToPoint (void) const;
   virtual bool IsBridge (void) const;
 
+  virtual bool SwitchSend (uint32_t qIndex, Ptr<Packet> packet, CustomHeader &ch);
   virtual bool Send (Ptr<Packet> packet, const Address &dest, uint16_t protocolNumber);
   virtual bool SendFrom (Ptr<Packet> packet, const Address& source, const Address& dest, uint16_t protocolNumber);
 

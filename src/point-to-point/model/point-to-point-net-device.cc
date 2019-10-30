@@ -30,6 +30,9 @@
 #include "point-to-point-channel.h"
 #include "ppp-header.h"
 
+#include "ns3/flow-id-tag.h"
+#include "switch-node.h"
+
 NS_LOG_COMPONENT_DEFINE ("PointToPointNetDevice");
 
 namespace ns3 {
@@ -322,6 +325,19 @@ PointToPointNetDevice::Receive (Ptr<Packet> packet)
     }
   else 
     {
+	if (DynamicCast<SwitchNode>(m_node)) {
+		m_macRxTrace(packet);
+		CustomHeader ch(CustomHeader::L2_Header | CustomHeader::L3_Header | CustomHeader::L4_Header);
+		packet->PeekHeader(ch);
+		if (ch.l3Prot == 0xFE)
+			return;
+		else {
+			//packet->AddPacketTag(FlowIdTag(m_ifIndex));
+			m_node->SwitchReceiveFromDevice(this, packet, ch);
+		}
+		//std::cout << "working \n";
+		return;
+	}
       // 
       // Hit the trace hooks.  All of these hooks are in the same place in this 
       // device becuase it is so simple, but this is not usually the case in 
@@ -629,5 +645,28 @@ PointToPointNetDevice::EtherToPpp (uint16_t proto)
   return 0;
 }
 
-
+bool
+PointToPointNetDevice::SwitchSend (uint32_t qIndex, Ptr<Packet> packet, CustomHeader &ch)
+{
+	m_macTxTrace (packet);
+	if (m_txMachineState == READY) {
+		// 
+		// Even if the transmitter is immediately available, we still enqueue and
+		// dequeue the packet to hit the tracing hooks.
+		//
+		if (m_queue->Enqueue (packet) == true)
+       	 	{
+        		packet = m_queue->Dequeue ();
+        		m_snifferTrace (packet);
+         		m_promiscSnifferTrace (packet);
+        		return TransmitStart (packet);
+      		} else {
+			// Enqueue may fail (overflow)
+			m_macTxDropTrace (packet);
+			return false;
+		}
+	} else {
+		return m_queue->Enqueue (packet);
+	}
+}
 } // namespace ns3

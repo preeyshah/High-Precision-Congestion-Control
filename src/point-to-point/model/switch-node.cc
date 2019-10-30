@@ -54,8 +54,10 @@ int SwitchNode::GetOutDev(Ptr<const Packet> p, CustomHeader &ch){
 	auto entry = m_rtTable.find(ch.dip);
 
 	// no matching entry
-	if (entry == m_rtTable.end())
+	if (entry == m_rtTable.end()) {
+		std::cout << "routing error\n";
 		return -1;
+	}
 
 	// entry found
 	auto &nexthops = entry->second;
@@ -97,6 +99,11 @@ void SwitchNode::SendToDev(Ptr<Packet>p, CustomHeader &ch){
 	int idx = GetOutDev(p, ch);
 	if (idx >= 0){
 		NS_ASSERT_MSG(m_devices[idx]->IsLinkUp(), "The routing table look up should return link that is up");
+		if (!DynamicCast<QbbNetDevice>(m_devices[idx])) {
+			m_devices[idx]->SwitchSend(0, p, ch);
+			return;
+		}
+		//	std::cout << "can make it " << "\n";
 
 		// determine the qIndex
 		uint32_t qIndex;
@@ -108,18 +115,22 @@ void SwitchNode::SendToDev(Ptr<Packet>p, CustomHeader &ch){
 
 		// admission control
 		FlowIdTag t;
-		p->PeekPacketTag(t);
-		uint32_t inDev = t.GetFlowId();
-		if (qIndex != 0){ //not highest priority
-			if (m_mmu->CheckIngressAdmission(inDev, qIndex, p->GetSize()) && m_mmu->CheckEgressAdmission(idx, qIndex, p->GetSize())){			// Admission control
-				m_mmu->UpdateIngressAdmission(inDev, qIndex, p->GetSize());
-				m_mmu->UpdateEgressAdmission(idx, qIndex, p->GetSize());
-			}else{
-				return; // Drop
+		if (p->PeekPacketTag(t)) {
+			//std::cout << "broken \n";
+			uint32_t inDev = t.GetFlowId();
+			if (qIndex != 0){ //not highest priority
+				if (m_mmu->CheckIngressAdmission(inDev, qIndex, p->GetSize()) && m_mmu->CheckEgressAdmission(idx, qIndex, p->GetSize())){			// Admission control
+					m_mmu->UpdateIngressAdmission(inDev, qIndex, p->GetSize());
+					m_mmu->UpdateEgressAdmission(idx, qIndex, p->GetSize());
+				}else{
+					return; // Drop
+				}
+				CheckAndSendPfc(inDev, qIndex);
 			}
-			CheckAndSendPfc(inDev, qIndex);
+			m_bytes[inDev][idx][qIndex] += p->GetSize();
 		}
-		m_bytes[inDev][idx][qIndex] += p->GetSize();
+		if (! m_devices[idx])
+			std::cout << "broken" << std::endl; 
 		m_devices[idx]->SwitchSend(qIndex, p, ch);
 	}else
 		return; // Drop

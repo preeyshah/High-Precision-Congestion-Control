@@ -530,7 +530,7 @@ Ptr<Packet> RdmaHw::GetNxtPacket(Ptr<RdmaQueuePair> qp){
 	SeqTsHeader seqTs;
 	if(qp->snd_nxt==0)
 	{
-		std::cout<<"Started flow "<<qp->sip<<" dst "<<qp->dip<<" port "<<qp->sport<<" Time "<<Simulator::Now()<<" Size "<<qp->m_size<<"\n";
+		//std::cout<<"Started flow "<<qp->sip<<" dst "<<qp->dip<<" port "<<qp->sport<<" Time "<<Simulator::Now()<<" Size "<<qp->m_size<<"\n";
 		starting_times[qp->sport] = Simulator::Now();
 	}
 	seqTs.SetSeq (qp->snd_nxt);

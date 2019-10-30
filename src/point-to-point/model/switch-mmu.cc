@@ -39,7 +39,7 @@ namespace ns3 {
 	void SwitchMmu::PrintStats(){
 		if(is_switch)
 		{
-			std::cout<<"Buffer at "<<sw_id<<" "<<shared_used_bytes<<" Time"<<Simulator::Now()<<" \n";
+			//std::cout<<"Buffer at "<<sw_id<<" "<<shared_used_bytes<<" Time"<<Simulator::Now()<<" \n";
 			Simulator::Schedule(MicroSeconds(2),&SwitchMmu::PrintStats, this);
 		}
 		

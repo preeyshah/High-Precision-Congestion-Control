@@ -123,13 +123,16 @@ class RdmaQueuePairGroup : public Object {
 public:
 	std::vector<Ptr<RdmaQueuePair> > m_qps;
 	//std::vector<Ptr<RdmaRxQueuePair> > m_rxQps;
-
+	//std::set<uint32_t> m_qps_set;
+	//Ptr<RDMAQueuePair> GetNext (uint32_t idx);
 	static TypeId GetTypeId (void);
 	RdmaQueuePairGroup(void);
 	uint32_t GetN(void);
+	//uint32_t GetNSet(void);
 	Ptr<RdmaQueuePair> Get(uint32_t idx);
 	Ptr<RdmaQueuePair> operator[](uint32_t idx);
 	void AddQp(Ptr<RdmaQueuePair> qp);
+	void Finished (uint32_t idx);
 	//void AddRxQp(Ptr<RdmaRxQueuePair> rxQp);
 	void Clear(void);
 };

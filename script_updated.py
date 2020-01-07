@@ -5,19 +5,19 @@ from numpy import sort
 from numpy import array
 filename = sys.argv[1]
 
-# os.system('cat '+filename+' | grep DATA_RATE > temp1')
-# tfile = open('temp1', 'r')
-# filedata = ''
-# for input in tfile:
-# 	filedata += input
+os.system('cat '+filename+' | grep DATA_RATE > temp1')
+tfile = open('temp1', 'r')
+filedata = ''
+for input in tfile:
+	filedata += input
 
-# filedata = filedata.split('\n')
-# dr = filedata[0].split('\t')[-1]
-# datarate = int(dr[0:-4])
-# os.system('rm temp1')
-# print(datarate)
+filedata = filedata.split('\n')
+dr = filedata[0].split('\t')[-1]
+datarate = int(dr[0:-4])
+os.system('rm temp1')
+print(datarate)
 
-datarate = 100.0
+#datarate = 100.0
 
 Incast_size = -1
 os.system('cat '+filename+' | grep \'Incast info\' > temp1')

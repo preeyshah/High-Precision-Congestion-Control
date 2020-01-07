@@ -924,11 +924,11 @@ for (int i = 1; i < enterprise_size.size(); i++) {
 	for (uint32_t i = 0; i < link_num; i++)
 	{
 		uint32_t src, dst;
-		std::string data_rate, link_delay;
+		std::string link_delay;
 		double error_rate =  0.0;
 		// double error_rate;
 		// topof >> src >> dst >> data_rate >> link_delay >> error_rate;
-		data_rate = "100Gbps";
+		//data_rate = "100Gbps";
 		link_delay = "0.001ms";
 		uint32_t end_num = 128;
 		if (i < end_num) {

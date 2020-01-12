@@ -47,7 +47,6 @@ else:
 	workload = filedata.split('\t')[-1]
 	if workload[0:2]=='W3':
 		is_w3 = True
-is_w3 = True
 print(is_w3)
 
 # FLOW_SIZE_IN_INCAST
@@ -177,7 +176,7 @@ for i in range(len(medians)):
 		#print(s)
 		# print(len(s))
 
-
+print(nums)
 print("Flows started", end=" ")
 print(started)
 print("Flows completed", end=" ")

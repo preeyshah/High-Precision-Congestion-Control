@@ -87,7 +87,7 @@ namespace ns3 {
 	}
 
 	Ptr<Packet>
-		BEgressQueue::DoDequeueRR(bool paused[]) //this is for switch only
+		BEgressQueue::DoDequeueRR(bool paused) //this is for switch only
 	{
 		NS_LOG_FUNCTION(this);
 
@@ -108,15 +108,18 @@ namespace ns3 {
 		{
 			if (!found)
 			{
-				for (qIndex = 1; qIndex <= qCnt; qIndex++)
+				if(!paused)
 				{
-					if (!paused[(qIndex + m_rrlast) % qCnt] && m_queues[(qIndex + m_rrlast) % qCnt]->GetNPackets() > 0)  //round robin
+					for (qIndex = 1; qIndex <= qCnt; qIndex++)
 					{
-						found = true;
-						break;
+						if ( m_queues[(qIndex + m_rrlast) % qCnt]->GetNPackets() > 0)  //round robin
+						{
+							found = true;
+							break;
+						}
 					}
+					qIndex = (qIndex + m_rrlast) % qCnt;
 				}
-				qIndex = (qIndex + m_rrlast) % qCnt;
 			}
 		}
 		if (found)
@@ -163,7 +166,7 @@ namespace ns3 {
 	}
 
 	Ptr<Packet>
-		BEgressQueue::DequeueRR(bool paused[])
+		BEgressQueue::DequeueRR(bool paused)
 	{
 		NS_LOG_FUNCTION(this);
 		Ptr<Packet> packet = DoDequeueRR(paused);

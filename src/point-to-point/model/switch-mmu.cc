@@ -32,6 +32,8 @@ namespace ns3 {
 		memset(hdrm_bytes, 0, sizeof(hdrm_bytes));
 		memset(ingress_bytes, 0, sizeof(ingress_bytes));
 		memset(paused, 0, sizeof(paused));
+		memset(blanket_pause, 0, sizeof(blanket_pause));
+		memset(ingress_port, 0, sizeof(ingress_port));
 		memset(egress_bytes, 0, sizeof(egress_bytes));
 		Simulator::Schedule(MicroSeconds(1000000),&SwitchMmu::PrintStats, this);
 	}
@@ -67,12 +69,14 @@ namespace ns3 {
 		uint32_t new_bytes = ingress_bytes[port][qIndex] + psize;
 		if (new_bytes <= reserve){
 			ingress_bytes[port][qIndex] += psize;
+			ingress_port[port] += psize;
 		}else {
 			uint32_t thresh = GetPfcThreshold(port);
 			if (new_bytes - reserve > thresh){
 				hdrm_bytes[port][qIndex] += psize;
 			}else {
 				ingress_bytes[port][qIndex] += psize;
+				ingress_port[port] += psize;
 				shared_used_bytes += std::min(psize, new_bytes - reserve);
 			}
 		}
@@ -85,25 +89,26 @@ namespace ns3 {
 		uint32_t from_shared = std::min(psize - from_hdrm, ingress_bytes[port][qIndex] > reserve ? ingress_bytes[port][qIndex] - reserve : 0);
 		hdrm_bytes[port][qIndex] -= from_hdrm;
 		ingress_bytes[port][qIndex] -= psize - from_hdrm;
+		ingress_port[port] -= psize - from_hdrm;
 		shared_used_bytes -= from_shared;
 	}
 	void SwitchMmu::RemoveFromEgressAdmission(uint32_t port, uint32_t qIndex, uint32_t psize){
 		egress_bytes[port][qIndex] -= psize;
 	}
 	bool SwitchMmu::CheckShouldPause(uint32_t port, uint32_t qIndex){
-		return !paused[port][qIndex] && (hdrm_bytes[port][qIndex] > 0 || GetSharedUsed(port, qIndex) >= GetPfcThreshold(port));
+		return !blanket_pause[port] && (hdrm_bytes[port][qIndex] > 0 || ingress_port[port] >= GetPfcThreshold(port));
 	}
 	bool SwitchMmu::CheckShouldResume(uint32_t port, uint32_t qIndex){
-		if (!paused[port][qIndex])
+		if (!blanket_pause[port])
 			return false;
-		uint32_t shared_used = GetSharedUsed(port, qIndex);
+		uint32_t shared_used = ingress_port[port];
 		return hdrm_bytes[port][qIndex] == 0 && (shared_used == 0 || shared_used + resume_offset <= GetPfcThreshold(port));
 	}
 	void SwitchMmu::SetPause(uint32_t port, uint32_t qIndex){
-		paused[port][qIndex] = true;
+		blanket_pause[port] = true;
 	}
 	void SwitchMmu::SetResume(uint32_t port, uint32_t qIndex){
-		paused[port][qIndex] = false;
+		blanket_pause[port] = false;
 	}
 
 	uint32_t SwitchMmu::GetPfcThreshold(uint32_t port){

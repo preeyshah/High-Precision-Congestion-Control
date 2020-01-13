@@ -53,7 +53,7 @@ public:
 	static TypeId GetTypeId (void);
 	RdmaEgressQueue();
 	Ptr<Packet> DequeueQindex(int qIndex);
-	int GetNextQindex(bool paused[]);
+	int GetNextQindex(bool paused);
 	int GetLastQueue();
 	uint32_t GetNBytes(uint32_t qIndex);
 	uint32_t GetFlowCount(void);
@@ -172,7 +172,7 @@ protected:
   bool m_dynamicth;
   uint32_t m_pausetime;	//< Time for each Pause
   bool m_paused[qCnt];	//< Whether a queue paused
-
+  bool is_paused;
   //qcn
 
   /* RP parameters */

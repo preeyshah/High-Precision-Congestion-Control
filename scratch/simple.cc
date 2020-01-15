@@ -1224,6 +1224,10 @@ for (int i = 1; i < enterprise_size.size(); i++) {
             dst = uint32_t(dis(gen) * 128)+16;
             if (dst != src) break;
         }
+	//if (flownum==1) {
+	//	src=20;
+	//	dst=40;
+	//}
         NS_ASSERT(dst < 144);
         NS_ASSERT(src < 144);
        	pg = 3;
@@ -1249,6 +1253,10 @@ for (int i = 1; i < enterprise_size.size(); i++) {
     		flow_packet_size = packetSize;
     		maxPacketCount = int(flow_size/packetSize)+1;
     	}
+	//if (flownum==1) {
+	//	flow_packet_size = packetSize;
+	//	maxPacketCount=10000000;
+	//}
 	
    
         if(flownum%1000==0) std::cout<<"New Flow Created Src "<<src<<" Dst "<<dst<<" FlowNum "<<flownum<<"Packets "<<maxPacketCount<<" Priority "<<pg<<"\n";

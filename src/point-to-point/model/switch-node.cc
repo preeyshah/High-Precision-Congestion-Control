@@ -2,7 +2,9 @@
 #include "ns3/packet.h"
 #include "ns3/ipv4-header.h"
 #include "ns3/pause-header.h"
+#include "ns3/ppp-header.h"
 #include "ns3/flow-id-tag.h"
+#include "ns3/random-variable.h"
 #include "ns3/boolean.h"
 #include "ns3/uinteger.h"
 #include "ns3/double.h"
@@ -10,6 +12,9 @@
 #include "qbb-net-device.h"
 #include "ppp-header.h"
 #include "ns3/int-header.h"
+#include "qbb-header.h"
+#include "cn-header.h"
+#include "rdma-hw.h"
 
 namespace ns3 {
 
@@ -100,6 +105,7 @@ void SwitchNode::SendToDev(Ptr<Packet>p, CustomHeader &ch){
 
 		// determine the qIndex
 		uint32_t qIndex;
+		m_ackHighPrio = true;
 		if (ch.l3Prot == 0xFF || ch.l3Prot == 0xFE || (m_ackHighPrio && (ch.l3Prot == 0xFD || ch.l3Prot == 0xFC))){  //QCN or PFC or NACK, go highest priority
 			qIndex = 0;
 		}else{
@@ -111,10 +117,40 @@ void SwitchNode::SendToDev(Ptr<Packet>p, CustomHeader &ch){
 		p->PeekPacketTag(t);
 		uint32_t inDev = t.GetFlowId();
 		if (qIndex != 0){ //not highest priority
-			if (m_mmu->CheckIngressAdmission(inDev, qIndex, p->GetSize()) && m_mmu->CheckEgressAdmission(idx, qIndex, p->GetSize())){			// Admission control
+			bool drop=false;
+			if (UniformVariable(0, 65536).GetValue()>40000) {
+				drop = true;
+			}
+			if (!drop && m_mmu->CheckIngressAdmission(inDev, qIndex, p->GetSize()) && m_mmu->CheckEgressAdmission(idx, qIndex, p->GetSize())){			// Admission control
 				m_mmu->UpdateIngressAdmission(inDev, qIndex, p->GetSize());
 				m_mmu->UpdateEgressAdmission(idx, qIndex, p->GetSize());
 			}else{
+				std::cout<<"Dropping\n";
+				qbbHeader seqh;
+				seqh.SetSeq(ch.udp.seq);
+				seqh.SetPG(ch.udp.pg);
+				seqh.SetSport(ch.udp.dport);
+				seqh.SetDport(ch.udp.sport);
+				seqh.SetIntHeader(ch.udp.ih);
+
+				Ptr<Packet> newp = Create<Packet>(std::max(60-14-20-(int)seqh.GetSerializedSize(), 0));
+				newp->AddHeader(seqh);
+
+				Ipv4Header head;	// Prepare IPv4 header
+				head.SetDestination(Ipv4Address(ch.sip));
+				head.SetSource(Ipv4Address(ch.dip));
+				head.SetProtocol(0xFD); //ack=0xFC nack=0xFD
+				head.SetTtl(64);
+				head.SetPayloadSize(newp->GetSize());
+				head.SetIdentification(UniformVariable(0, 65536).GetValue()); //Dont' know what to do
+
+				newp->AddHeader(head);
+				//AddHeader(newp, 0x800);
+				PppHeader ppp;
+				ppp.SetProtocol (0x0021);
+				newp->AddHeader(ppp);
+				Ptr<QbbNetDevice> device = DynamicCast<QbbNetDevice>(m_devices[inDev]);
+				device->SwitchSend(0,newp,ch);
 				return; // Drop
 			}
 			CheckAndSendPfc(inDev, qIndex);

@@ -418,6 +418,7 @@ namespace ns3 {
 	}
 
 	void QbbNetDevice::SendPfc(uint32_t qIndex, uint32_t type){
+		return; //PFC Disabled
 		Ptr<Packet> p = Create<Packet>(0);
 		PauseHeader pauseh((type == 0 ? m_pausetime : 0), m_queue->GetNBytes(qIndex), qIndex);
 		p->AddHeader(pauseh);

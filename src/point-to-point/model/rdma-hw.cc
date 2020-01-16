@@ -295,9 +295,9 @@ int RdmaHw::ReceiveUdp(Ptr<Packet> p, CustomHeader &ch){
 
 	int x = ReceiverCheckSeq(ch.udp.seq, rxQp, payload_size);
 
-	/*if (ch.udp.seq>=10000000) {
-		std::cout<<"Received at T: "<<Simulator::Now()<<" seq "<<ch.udp.seq<<"\n";
-	}*/
+	//if (ch.udp.seq>=10000000) {
+		std::cout<<"Received at T: "<<Simulator::Now()<<" seq "<<rxQp->ReceiverNextExpectedSeq<<"\n";
+	//}
 	if (x == 1 || x == 2){ //generate ACK or NACK
 		qbbHeader seqh;
 		seqh.SetSeq(rxQp->ReceiverNextExpectedSeq);
@@ -388,19 +388,30 @@ int RdmaHw::ReceiveAck(Ptr<Packet> p, CustomHeader &ch){
 	if (m_ack_interval == 0)
 		std::cout << "ERROR: shouldn't receive ack\n";
 	else {
-		if (!m_backto0){
-			qp->Acknowledge(seq);
-		}else {
-			uint32_t goback_seq = seq / m_chunk * m_chunk;
-			qp->Acknowledge(goback_seq);
-		}
-		if (qp->IsFinished()){
-			std::cout<<"Finished flow at "<<qp->sip<<" dst "<<qp->dip<<" in time "<<Simulator::Now()-starting_times[qp->sport]<<" port "<<qp->sport<<" Size "<<qp->m_size<<" Time "<<Simulator::Now()<<" \n";
-			QpComplete(qp);
+		if (ch.l3Prot == 0xFC) {
+		std::cout<<"Ack "<<seq<<"\n";
+			if (!m_backto0){
+				qp->Acknowledge(seq);
+			}else {
+				uint32_t goback_seq = seq / m_chunk * m_chunk;
+				qp->Acknowledge(goback_seq);
+			}
+			if (qp->IsFinished()){
+				std::cout<<"Finished flow at "<<qp->sip<<" dst "<<qp->dip<<" in time "<<Simulator::Now()-starting_times[qp->sport]<<" port "<<qp->sport<<" Size "<<qp->m_size<<" Time "<<Simulator::Now()<<" \n";
+				QpComplete(qp);
+			}
 		}
 	}
-	if (ch.l3Prot == 0xFD) // NACK
-		RecoverQueue(qp);
+	if (ch.l3Prot == 0xFD) // NACK {
+	{
+		if (qp->m_size < m_mtu)
+			qp->snd_nxt -= qp->m_size;
+		else
+			qp->snd_nxt -= m_mtu;
+		std::cout<<"Nack "<<qp->snd_nxt<<" "<<qp->snd_una<<"\n";
+		//RecoverQueue(qp);
+	//	return 0;
+	}
 
 	// handle cnp
 	if (cnp){
@@ -408,7 +419,6 @@ int RdmaHw::ReceiveAck(Ptr<Packet> p, CustomHeader &ch){
 			cnp_received_mlx(qp);
 		} 
 	}
-
 	if (m_cc_mode == 3){
 		HandleAckHp(qp, p, ch);
 	}else if (m_cc_mode == 7){
@@ -436,12 +446,12 @@ int RdmaHw::Receive(Ptr<Packet> p, CustomHeader &ch){
 
 int RdmaHw::ReceiverCheckSeq(uint32_t seq, Ptr<RdmaRxQueuePair> q, uint32_t size){
 	uint32_t expected = q->ReceiverNextExpectedSeq;
-	if (seq == expected){
+	if (true or seq == expected){
 		// if(seq>=q->m_size)
 		// {
 		// 	std::cout<<"Received flow "<<q->sip<<" dst "<<q->dip<<" port "<<q->sport<<" Time "<<Simulator::Now()<<" Size "<<q->m_size<<"\n";
 		// }
-		q->ReceiverNextExpectedSeq = expected + size;
+		q->ReceiverNextExpectedSeq += size;
 		if (q->ReceiverNextExpectedSeq >= q->m_milestone_rx){
 			q->m_milestone_rx += m_ack_interval;
 			return 1; //Generate ACK
@@ -569,12 +579,12 @@ Ptr<Packet> RdmaHw::GetNxtPacket(Ptr<RdmaQueuePair> qp){
 }
 
 void RdmaHw::PktSent(Ptr<RdmaQueuePair> qp, Ptr<Packet> pkt, Time interframeGap){
-	/*CustomHeader ch(CustomHeader::L2_Header | CustomHeader::L3_Header | CustomHeader::L4_Header);
+	CustomHeader ch(CustomHeader::L2_Header | CustomHeader::L3_Header | CustomHeader::L4_Header);
         ch.getInt = 1; // parse INT header
         pkt->PeekHeader(ch);
-	if (ch.udp.seq>=10000000) {
+	//if (ch.udp.seq>=10000000) {
 		std::cout<<"Sent at T: "<<Simulator::Now()<<" seq "<<ch.udp.seq<<"\n";
-	}*/
+	//}
 	qp->lastPktSize = pkt->GetSize();
 	UpdateNextAvail(qp, interframeGap, pkt->GetSize());
 }

@@ -29,6 +29,7 @@ namespace ns3 {
 
 		// headroom
 		shared_used_bytes = 0;
+		totalBytes = 0;
 		memset(hdrm_bytes, 0, sizeof(hdrm_bytes));
 		memset(ingress_bytes, 0, sizeof(ingress_bytes));
 		memset(paused, 0, sizeof(paused));
@@ -39,7 +40,7 @@ namespace ns3 {
 	void SwitchMmu::PrintStats(){
 		if(is_switch)
 		{
-			std::cout<<"Buffer at "<<sw_id<<" "<<shared_used_bytes<<" Time"<<Simulator::Now()<<" \n";
+			std::cout<<"Buffer at "<<sw_id<<" "<<totalBytes<<" Time"<<Simulator::Now()<<" \n";
 			Simulator::Schedule(MicroSeconds(2),&SwitchMmu::PrintStats, this);
 		}
 		
@@ -51,19 +52,23 @@ namespace ns3 {
 		
 	}
 	bool SwitchMmu::CheckIngressAdmission(uint32_t port, uint32_t qIndex, uint32_t psize){
-		if (psize + hdrm_bytes[port][qIndex] > headroom[port] && psize + GetSharedUsed(port, qIndex) > GetPfcThreshold(port)){
+		if (totalBytes + psize > buffer_size) {
+			return false;
+		}
+		/*if (psize + hdrm_bytes[port][qIndex] > headroom[port] && psize + GetSharedUsed(port, qIndex) > GetPfcThreshold(port)){
 			printf("%lu %u Drop: queue:%u,%u: Headroom full\n", Simulator::Now().GetTimeStep(), node_id, port, qIndex);
 			for (uint32_t i = 1; i < 64; i++)
 				printf("(%u,%u)", hdrm_bytes[i][3], ingress_bytes[i][3]);
 			printf("\n");
 			return false;
-		}
+		}*/
 		return true;
 	}
 	bool SwitchMmu::CheckEgressAdmission(uint32_t port, uint32_t qIndex, uint32_t psize){
 		return true;
 	}
 	void SwitchMmu::UpdateIngressAdmission(uint32_t port, uint32_t qIndex, uint32_t psize){
+		totalBytes += psize;
 		uint32_t new_bytes = ingress_bytes[port][qIndex] + psize;
 		if (new_bytes <= reserve){
 			ingress_bytes[port][qIndex] += psize;
@@ -81,6 +86,7 @@ namespace ns3 {
 		egress_bytes[port][qIndex] += psize;
 	}
 	void SwitchMmu::RemoveFromIngressAdmission(uint32_t port, uint32_t qIndex, uint32_t psize){
+		totalBytes -= psize;
 		uint32_t from_hdrm = std::min(hdrm_bytes[port][qIndex], psize);
 		uint32_t from_shared = std::min(psize - from_hdrm, ingress_bytes[port][qIndex] > reserve ? ingress_bytes[port][qIndex] - reserve : 0);
 		hdrm_bytes[port][qIndex] -= from_hdrm;

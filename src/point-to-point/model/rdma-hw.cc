@@ -296,7 +296,7 @@ int RdmaHw::ReceiveUdp(Ptr<Packet> p, CustomHeader &ch){
 	int x = ReceiverCheckSeq(ch.udp.seq, rxQp, payload_size);
 
 	//if (ch.udp.seq>=10000000) {
-		std::cout<<"Received at T: "<<Simulator::Now()<<" seq "<<rxQp->ReceiverNextExpectedSeq<<"\n";
+	//	std::cout<<"Received at T: "<<Simulator::Now()<<" seq "<<rxQp->ReceiverNextExpectedSeq<<"\n";
 	//}
 	if (x == 1 || x == 2){ //generate ACK or NACK
 		qbbHeader seqh;
@@ -389,7 +389,7 @@ int RdmaHw::ReceiveAck(Ptr<Packet> p, CustomHeader &ch){
 		std::cout << "ERROR: shouldn't receive ack\n";
 	else {
 		if (ch.l3Prot == 0xFC) {
-		std::cout<<"Ack "<<seq<<"\n";
+		//std::cout<<"Ack "<<seq<<"\n";
 			if (!m_backto0){
 				qp->Acknowledge(seq);
 			}else {
@@ -408,9 +408,9 @@ int RdmaHw::ReceiveAck(Ptr<Packet> p, CustomHeader &ch){
 			qp->snd_nxt -= qp->m_size;
 		else
 			qp->snd_nxt -= m_mtu;
-		std::cout<<"Nack "<<qp->snd_nxt<<" "<<qp->snd_una<<"\n";
+		//std::cout<<"Nack "<<qp->snd_nxt<<" "<<qp->snd_una<<"\n";
 		//RecoverQueue(qp);
-	//	return 0;
+		return 0;
 	}
 
 	// handle cnp
@@ -583,7 +583,7 @@ void RdmaHw::PktSent(Ptr<RdmaQueuePair> qp, Ptr<Packet> pkt, Time interframeGap)
         ch.getInt = 1; // parse INT header
         pkt->PeekHeader(ch);
 	//if (ch.udp.seq>=10000000) {
-		std::cout<<"Sent at T: "<<Simulator::Now()<<" seq "<<ch.udp.seq<<"\n";
+	//	std::cout<<"Sent at T: "<<Simulator::Now()<<" seq "<<ch.udp.seq<<"\n";
 	//}
 	qp->lastPktSize = pkt->GetSize();
 	UpdateNextAvail(qp, interframeGap, pkt->GetSize());

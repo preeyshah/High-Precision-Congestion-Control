@@ -1228,6 +1228,9 @@ for (int i = 1; i < enterprise_size.size(); i++) {
 	//	src=20;
 	//	dst=40;
 	//}
+	if (maxPacketCount == packet_size_incast) {
+		maxPacketCount +=1;
+	}
         NS_ASSERT(dst < 144);
         NS_ASSERT(src < 144);
        	pg = 3;

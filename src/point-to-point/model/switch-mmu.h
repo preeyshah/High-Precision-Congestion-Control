@@ -11,7 +11,7 @@ class Packet;
 class SwitchMmu: public Object{
 public:
 	static const uint32_t pCnt = 257;	// Number of ports used
-	static const uint32_t qCnt = 8;	// Number of queues/priorities used
+	static const uint32_t qCnt = 35;	// Number of queues/priorities used
 
 	static TypeId GetTypeId (void);
 

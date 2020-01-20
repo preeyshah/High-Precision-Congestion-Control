@@ -38,7 +38,7 @@ namespace ns3 {
 
 class RdmaEgressQueue : public Object{
 public:
-	static const uint32_t qCnt = 8;
+	static const uint32_t qCnt = 35;
 	static uint32_t ack_q_idx;
 	uint32_t m_mtu;
 	int m_qlast;

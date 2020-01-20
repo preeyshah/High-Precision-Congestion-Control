@@ -130,6 +130,7 @@ public:
 	Ptr<RdmaQueuePair> Get(uint32_t idx);
 	Ptr<RdmaQueuePair> operator[](uint32_t idx);
 	void AddQp(Ptr<RdmaQueuePair> qp);
+	void Finished (uint32_t idx);
 	//void AddRxQp(Ptr<RdmaRxQueuePair> rxQp);
 	void Clear(void);
 };

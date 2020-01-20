@@ -101,6 +101,12 @@ namespace ns3 {
 		uint32_t fcount = m_qpGrp->GetN();
 		for (qIndex = 1; qIndex <= fcount; qIndex++){
 			Ptr<RdmaQueuePair> qp = m_qpGrp->Get((qIndex + m_rrlast) % fcount);
+			if (qp->IsFinished()) {
+				m_qpGrp->Finished((qIndex+m_rrlast)%fcount);
+				qIndex-=1;
+				fcount-=1;
+				continue;
+			}
 			if (!paused && qp->GetBytesLeft() > 0 && !qp->IsWinBound()){
 				if (m_qpGrp->Get((qIndex + m_rrlast) % fcount)->m_nextAvail.GetTimeStep() > Simulator::Now().GetTimeStep()) //not available now
 					continue;

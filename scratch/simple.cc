@@ -85,7 +85,6 @@ uint32_t enable_trace = 1;
 
 uint32_t buffer_size = 16;
 
-uint32_t qCnt = 8;
 
 uint32_t qlen_dump_interval = 100000000, qlen_mon_interval = 100;
 uint64_t qlen_mon_start = 2000000000, qlen_mon_end = 2100000000;
@@ -208,7 +207,7 @@ void monitor_buffer(FILE* qlen_output, NodeContainer *n){
 				queue_result[i];
 			for (uint32_t j = 1; j < sw->GetNDevices(); j++){
 				uint32_t size = 0;
-				for (uint32_t k = 0; k < qCnt; k++)
+				for (uint32_t k = 0; k < SwitchMmu::qCnt; k++)
 					size += sw->m_mmu->egress_bytes[j][k];
 				queue_result[i][j].add(size);
 			}
@@ -736,14 +735,6 @@ int main(int argc, char *argv[])
 				app_stop_time = v;
 				std::cout << "SINK_STOP_TIME\t\t\t" << app_stop_time << "\n";
 			}
-			else if (key.compare("QCOUNT") == 0){
-				int qC ;
-				conf >> qC;
-				qCnt = qC;
-				std::cout << "QCOUNT\t\t\t"<<qCnt<<"\n";
-				std::cout<<"QCOUNT NEEDS TO BE CHANGED IN THE FOLLOWING FILES\n"
-				//std::cout<<'\n';
-			}
 			fflush(stdout);
 		}
 		conf.close();
@@ -1176,6 +1167,7 @@ for (int i = 1; i < enterprise_size.size(); i++) {
 	//std::cout<<interarrival<<"in\n";
 	Time interPacketInterval = Seconds(interarrival); //800ns assuming 10Gbps link and 1000 Byte Payload
     std::mt19937 gen(5489U); //Same Seed for all the Simlulations
+    std::mt19937 gen2(5489U); //Same Seed for all the Simlulations
     std::uniform_real_distribution<> dis(0.0, 1.0);
     std::exponential_distribution<double> exp_dis(flows_per_sec);
     double m = -(sigma*sigma/2)-log(flows_per_sec);
@@ -1236,7 +1228,7 @@ for (int i = 1; i < enterprise_size.size(); i++) {
         }
         NS_ASSERT(dst < 144);
         NS_ASSERT(src < 144);
-       	pg = 3+(dis(gen)*(qCnt - 8));
+       	pg = 3+(dis(gen2)*(15));
        	//} //priority between 1 & 125, 0, 126 & 127 reserved
         double flow_size_helper = dis(gen);
         int start_ind=0, end_ind=enterprise_size.size();
@@ -1283,6 +1275,7 @@ for (int i = 1; i < enterprise_size.size(); i++) {
 	        	incasts_done++;
 	        	//std::cout<<"Incast done "<<incasts_done<<" \n";
 	        	//dst = uint32_t(dis(gen) * 64);
+	       		pg = 3+(dis(gen2)*(15));
 	        	for(int k = 0; k < num_sources;k++)
 	        	{
 	        		while (true)
@@ -1291,7 +1284,6 @@ for (int i = 1; i < enterprise_size.size(); i++) {
 	           		 	if (dst != src) break;
 	       			 }
 	       			 maxPacketCount= packet_size_incast;
-	       			pg = 3+(dis(gen)*(qCnt - 8));
 	       			
 	       			NS_ASSERT(n.Get(src)->GetNodeType() == 0 && n.Get(dst)->GetNodeType() == 0);
 		port = portNumder[src]++; // get a new port number 

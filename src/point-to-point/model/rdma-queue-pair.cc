@@ -212,6 +212,10 @@ void RdmaQueuePairGroup::AddQp(Ptr<RdmaQueuePair> qp){
 	m_qps.push_back(qp);
 }
 
+void RdmaQueuePairGroup::Finished(uint32_t idx) {
+	m_qps.erase(m_qps.begin()+idx);
+}
+
 #if 0
 void RdmaQueuePairGroup::AddRxQp(Ptr<RdmaRxQueuePair> rxQp){
 	m_rxQps.push_back(rxQp);

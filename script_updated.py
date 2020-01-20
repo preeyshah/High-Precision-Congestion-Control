@@ -79,11 +79,14 @@ for i in range(len(filedata)):
 			dst = int((sep[5].split('.'))[1])
 			#print('dst')
 			time = int(((sep[8].split('.'))[0]).split('+')[1])
+			time2 = int(((sep[14].split('.'))[0]).split('+')[1])
 			#print('time')
 			size = int(sep[12])
 			#print('size')
 			ld = 8000
 			ex = 3
+			if False and (time2<1150000000 or time2>1200000000):
+				continue
 			np = int(size/1000)
 			if size < 1000:
 				np = 1

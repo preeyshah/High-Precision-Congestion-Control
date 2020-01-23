@@ -1228,7 +1228,7 @@ for (int i = 1; i < enterprise_size.size(); i++) {
         }
         NS_ASSERT(dst < 144);
         NS_ASSERT(src < 144);
-       	pg = 3+(dis(gen2)*(15));
+       	pg = 3+(dis(gen2)*(30));
        	//} //priority between 1 & 125, 0, 126 & 127 reserved
         double flow_size_helper = dis(gen);
         int start_ind=0, end_ind=enterprise_size.size();
@@ -1275,9 +1275,9 @@ for (int i = 1; i < enterprise_size.size(); i++) {
 	        	incasts_done++;
 	        	//std::cout<<"Incast done "<<incasts_done<<" \n";
 	        	//dst = uint32_t(dis(gen) * 64);
-	       		pg = 3+(dis(gen2)*(15));
 	        	for(int k = 0; k < num_sources;k++)
 	        	{
+	       			pg = 3+(dis(gen2)*(30));
 	        		while (true)
 	        		 {
 	            		src = uint32_t(dis(gen) * 128) + 16;

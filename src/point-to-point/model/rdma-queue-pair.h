@@ -71,6 +71,7 @@ public:
 		uint32_t m_highSeq; // when to exit cwr
 		double m_alpha;
 		uint32_t m_ecnCnt;
+		bool slowstart;
 		uint32_t m_batchSizeOfAlpha;
 	} dctcp;
 

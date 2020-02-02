@@ -232,7 +232,8 @@ void RdmaHw::AddQueuePair(uint64_t size, uint16_t pg, Ipv4Address sip, Ipv4Addre
 
 	// set init variables
 	DataRate m_bps = m_nic[nic_idx].dev->GetDataRate();
-	qp->m_rate = m_bps;
+	qp->m_rate = m_bps/10.0;
+	qp->dctcp.slowstart = true;
 	qp->m_max_rate = m_bps;
 	if (m_cc_mode == 1){
 		qp->mlx.m_targetRate = m_bps;
@@ -993,6 +994,13 @@ void RdmaHw::HandleAckDctcp(Ptr<RdmaQueuePair> qp, Ptr<Packet> p, CustomHeader &
 
 	// update alpha
 	qp->dctcp.m_ecnCnt += (cnp > 0);
+	if(qp->dctcp.m_ecnCnt > 0) {
+		qp->dctcp.slowstart = false;
+	}
+	if (qp->dctcp.slowstart) {
+		qp->m_rate = std::min(qp->m_max_rate, qp->m_rate + 2*m_dctcp_rai);
+		return;
+	}
 	if (ack_seq > qp->dctcp.m_lastUpdateSeq){ // if full RTT feedback is ready, do alpha update
 		#if PRINT_LOG
 		printf("%lu %s %08x %08x %u %u [%u,%u,%u] %.3lf->", Simulator::Now().GetTimeStep(), "alpha", qp->sip.Get(), qp->dip.Get(), qp->sport, qp->dport, qp->dctcp.m_lastUpdateSeq, ch.ack.seq, qp->snd_nxt, qp->dctcp.m_alpha);

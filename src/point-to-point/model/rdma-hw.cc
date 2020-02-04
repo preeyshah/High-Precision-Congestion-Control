@@ -295,9 +295,9 @@ int RdmaHw::ReceiveUdp(Ptr<Packet> p, CustomHeader &ch){
 
 	int x = ReceiverCheckSeq(ch.udp.seq, rxQp, payload_size);
 
-	/*if (ch.udp.seq>=10000000) {
-		std::cout<<"Received at T: "<<Simulator::Now()<<" seq "<<ch.udp.seq<<"\n";
-	}*/
+	if (ch.udp.seq>=10000) {
+		std::cout<<"Received at T: "<<Simulator::Now()<<" seq "<<ch.udp.seq<<"at"<<ch.sip<<"\n";
+	}
 	if (x == 1 || x == 2){ //generate ACK or NACK
 		qbbHeader seqh;
 		seqh.SetSeq(rxQp->ReceiverNextExpectedSeq);

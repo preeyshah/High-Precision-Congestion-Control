@@ -157,7 +157,7 @@ bool create_incast = false;
 uint32_t packet_size_incast = 20;
  uint32_t num_sources = 200;
 
-
+bool inter_dc_traffic = true;
 uint64_t nic_rate;
 
 uint64_t maxRtt, maxBdp;
@@ -736,6 +736,22 @@ int main(int argc, char *argv[])
 				app_stop_time = v;
 				std::cout << "SINK_STOP_TIME\t\t\t" << app_stop_time << "\n";
 			}
+			else if (key.compare("INTER_DC_TRAFFIC") == 0)
+			{
+				uint32_t v;
+				conf >> v;
+				inter_dc_traffic = v;
+				if (inter_dc_traffic)
+				{
+					 // flow_rate -= 32 * 10 * 1000000000.0*0.05;
+					 // flows_per_sec = flow_rate/(8.0*avg_flow_size);
+						std::cout << "INTER_DC_TRAFFIC\t\t" << "Yes" << "\n";
+				}
+				else
+				{
+					std::cout << "INTER_DC_TRAFFIC\t\t" << "No" << "\n";
+				}
+			}
 			else if (key.compare("QCOUNT") == 0){
 				int qC ;
 				conf >> qC;
@@ -785,22 +801,23 @@ int main(int argc, char *argv[])
 	// flowf >> flow_num;
 	// tracef >> trace_num;
 
-	
+	uint32_t tot_nodes = 154;
 
-	node_num = 144;
-	switch_num = 16;
+	node_num = 77;
+	switch_num = 13;
 
 
 	NodeContainer n;
 	//n.Create(node_num);
-	std::vector<uint32_t> node_type(node_num, 0);
+	std::vector<uint32_t> node_type(tot_nodes, 0);
 	for (uint32_t i = 0; i < switch_num; i++)
 	{
 		uint32_t sid;
-		sid = i;
+		sid = i+64;
 		node_type[sid] = 1;
+		node_type[sid+77]=1;
 	}
-	for (uint32_t i = 0; i < node_num; i++){
+	for (uint32_t i = 0; i < tot_nodes; i++){
 		if (node_type[i] == 0)
 			n.Add(CreateObject<Node>());
 		else{
@@ -889,11 +906,11 @@ for (int i = 1; i < enterprise_size.size(); i++) {
 
 	
 	std::cout<<"Utilization Factor (including incast, if there) "<<utilization_factor<<"\n";
-	double flow_rate= 64 * datarate * 1000000000.0 * utilization_factor;//in Bits/s
+	double flow_rate= 32 * datarate * 1000000000.0 * utilization_factor;//in Bits/s
 //double flow_rate= 0.5 * 10 * 1000000000.0 * 0.6;//in Bits/s
 	if(create_incast)
 	{
-		flow_rate -= 64*datarate*1000000000.0 *0.05;
+		flow_rate -= 32*datarate*1000000000.0 *0.05;
 	}
 	double flows_per_sec = flow_rate / (avg_flow_size * 8.0);
 
@@ -906,7 +923,7 @@ for (int i = 1; i < enterprise_size.size(); i++) {
 	// Assign IP to each server
 	//
 	std::vector<Ipv4Address> serverAddress;
-	for (uint32_t i = 0; i < node_num; i++){
+	for (uint32_t i = 0; i < tot_nodes; i++){
 		if (n.Get(i)->GetNodeType() == 0){ // is server
 			serverAddress.resize(i + 1);
 			serverAddress[i] = Ipv4Address(0x0b000001 + ((i / 256) * 0x00010000) + ((i % 256) * 0x00000100));
@@ -930,7 +947,7 @@ for (int i = 1; i < enterprise_size.size(); i++) {
 
 	QbbHelper qbb;
 	Ipv4AddressHelper ipv4;
-	link_num = 192;
+	link_num = 208;
 	for (uint32_t i = 0; i < link_num; i++)
 	{
 		uint32_t src, dst;
@@ -941,19 +958,39 @@ for (int i = 1; i < enterprise_size.size(); i++) {
 		data_rate = "100Gbps";
 		link_delay = "0.001ms";
 		uint32_t end_num = 128;
-		if (i < end_num) {
-            src=i/16;
-            dst=i+16;
-   //          data_rate="100Gbps";
-   //          qbb.SetDeviceAttribute("DataRate", StringValue(data_rate));
-			// qbb.SetChannelAttribute("Delay", StringValue(link_delay));
-        } else {
-            dst=(i-end_num)/8;
-            src=(i-end_num)%8 + 8;// Why 68? CHECK??
-   //          data_rate="100Gbps";
-   //          qbb.SetDeviceAttribute("DataRate", StringValue(data_rate));
-			// qbb.SetChannelAttribute("Delay", StringValue(link_delay));
-        }
+		if(i<104)
+        {
+	        if (i < 64) {
+	            src=64+(i/16);
+	            dst=i;
+	        } else if(i<96) {
+	            dst=(i-64)/8 + 64;
+	            src=(i-64)%8 + 68;// Why 68? CHECK??
+	        }
+	        else{
+	        	src = i-96+68;
+	        	dst = 76;
+			//data_rate = "100Gbps";
+	        }
+	    }
+	    else{
+	    	i = i -104;
+	    	if (i < 64) {
+	            src=64+(i/16);
+	            dst=i;
+	        } else if(i<96) {
+	            dst=(i-64)/8 + 64;
+	            src=(i-64)%8 + 68;// Why 68? CHECK??
+	        }
+	        else{
+	        	//data_rate = "100Gbps" ;
+	        	src = i-96+68;
+	        	dst = 76;
+	        }
+	        i = i+ 104;
+	        src += 77;
+	        dst +=77;
+	    }
 		Ptr<Node> snode = n.Get(src), dnode = n.Get(dst);
 
 		qbb.SetDeviceAttribute("DataRate", StringValue(data_rate));
@@ -1013,10 +1050,63 @@ for (int i = 1; i < enterprise_size.size(); i++) {
 		DynamicCast<QbbNetDevice>(d.Get(1))->TraceConnectWithoutContext("QbbPfc", MakeBoundCallback (&get_pfc, pfc_file, DynamicCast<QbbNetDevice>(d.Get(1))));
 	}
 
+	//INTER DC LINK
+	uint32_t src, dst;
+	src = 76;
+	dst = 153;
+
+	Ptr<Node> snode = n.Get(src), dnode = n.Get(dst);
+
+	qbb.SetDeviceAttribute("DataRate", StringValue("200Gbps"));
+	qbb.SetChannelAttribute("Delay", StringValue("0.2ms"));
+
+	qbb.SetDeviceAttribute("ReceiveErrorModel", PointerValue(rem));
+
+	fflush(stdout);
+
+		// Assigne server IP
+		// Note: this should be before the automatic assignment below (ipv4.Assign(d)),
+		// because we want our IP to be the primary IP (first in the IP address list),
+		// so that the global routing is based on our IP
+		NetDeviceContainer d = qbb.Install(snode, dnode);
+		if (snode->GetNodeType() == 0){
+			Ptr<Ipv4> ipv4 = snode->GetObject<Ipv4>();
+			ipv4->AddInterface(d.Get(0));
+			ipv4->AddAddress(1, Ipv4InterfaceAddress(serverAddress[src], Ipv4Mask(0xff000000)));
+		}
+		if (dnode->GetNodeType() == 0){
+			Ptr<Ipv4> ipv4 = dnode->GetObject<Ipv4>();
+			ipv4->AddInterface(d.Get(1));
+			ipv4->AddAddress(1, Ipv4InterfaceAddress(serverAddress[dst], Ipv4Mask(0xff000000)));
+		}
+
+		// used to create a graph of the topology
+		nbr2if[snode][dnode].idx = DynamicCast<QbbNetDevice>(d.Get(0))->GetIfIndex();
+		nbr2if[snode][dnode].up = true;
+		nbr2if[snode][dnode].delay = DynamicCast<QbbChannel>(DynamicCast<QbbNetDevice>(d.Get(0))->GetChannel())->GetDelay().GetTimeStep();
+		nbr2if[snode][dnode].bw = DynamicCast<QbbNetDevice>(d.Get(0))->GetDataRate().GetBitRate();
+		nbr2if[dnode][snode].idx = DynamicCast<QbbNetDevice>(d.Get(1))->GetIfIndex();
+		nbr2if[dnode][snode].up = true;
+		nbr2if[dnode][snode].delay = DynamicCast<QbbChannel>(DynamicCast<QbbNetDevice>(d.Get(1))->GetChannel())->GetDelay().GetTimeStep();
+		nbr2if[dnode][snode].bw = DynamicCast<QbbNetDevice>(d.Get(1))->GetDataRate().GetBitRate();
+
+		// This is just to set up the connectivity between nodes. The IP addresses are useless
+		char ipstring[16];
+		sprintf(ipstring, "10.%d.%d.0", i / 254 + 1, i % 254 + 1);
+		ipv4.SetBase(ipstring, "255.255.255.0");
+		ipv4.Assign(d);
+
+		// setup PFC trace
+		DynamicCast<QbbNetDevice>(d.Get(0))->TraceConnectWithoutContext("QbbPfc", MakeBoundCallback (&get_pfc, pfc_file, DynamicCast<QbbNetDevice>(d.Get(0))));
+		DynamicCast<QbbNetDevice>(d.Get(1))->TraceConnectWithoutContext("QbbPfc", MakeBoundCallback (&get_pfc, pfc_file, DynamicCast<QbbNetDevice>(d.Get(1))));
+
+
+
+	/////////////////////
 	nic_rate = get_nic_rate(n);
 
 	// config switch
-	for (uint32_t i = 0; i < node_num; i++){
+	for (uint32_t i = 0; i < tot_nodes; i++){
 		if (n.Get(i)->GetNodeType() == 1){ // is switch
 			Ptr<SwitchNode> sw = DynamicCast<SwitchNode>(n.Get(i));
 			uint32_t shift = 3; // by default 1/8
@@ -1045,7 +1135,12 @@ for (int i = 1; i < enterprise_size.size(); i++) {
 			sw->m_mmu->node_id = sw->GetId();
 			sw->m_mmu->node_id = sw->GetId();
 			sw->m_mmu->SetSwitch(i);
+			if((i+1)%77==0)
+			{
+				sw->m_mmu->SetGateway();
+			}
 		}
+
 	}
 
 	#if ENABLE_QP
@@ -1053,7 +1148,7 @@ for (int i = 1; i < enterprise_size.size(); i++) {
 	//
 	// install RDMA driver
 	//
-	for (uint32_t i = 0; i < node_num; i++){
+	for (uint32_t i = 0; i < tot_nodes; i++){
 		if (n.Get(i)->GetNodeType() == 0){ // is server
 			// create RdmaHw
 			Ptr<RdmaHw> rdmaHw = CreateObject<RdmaHw>();
@@ -1101,7 +1196,7 @@ for (int i = 1; i < enterprise_size.size(); i++) {
 	//
 	// setup switch CC
 	//
-	for (uint32_t i = 0; i < node_num; i++){
+	for (uint32_t i = 0; i < tot_nodes; i++){
 		if (n.Get(i)->GetNodeType() == 1){ // switch
 			Ptr<SwitchNode> sw = DynamicCast<SwitchNode>(n.Get(i));
 			sw->SetAttribute("CcMode", UintegerValue(cc_mode));
@@ -1116,10 +1211,10 @@ for (int i = 1; i < enterprise_size.size(); i++) {
 	// get BDP and delay
 	//
 	maxRtt = maxBdp = 0;
-	for (uint32_t i = 0; i < node_num; i++){
+	for (uint32_t i = 0; i < tot_nodes; i++){
 		if (n.Get(i)->GetNodeType() != 0)
 			continue;
-		for (uint32_t j = i+1; j < node_num; j++){
+		for (uint32_t j = i+1; j < tot_nodes; j++){
 			if (n.Get(j)->GetNodeType() != 0)
 				continue;
 			uint64_t delay = pairDelay[n.Get(i)][n.Get(j)];
@@ -1184,7 +1279,7 @@ for (int i = 1; i < enterprise_size.size(); i++) {
     //for (uint32_t i = 0; i < flow_num; i++)
     uint32_t flownum=0;
     
-    uint32_t num_of_incasts = (app_stop_time-app_start_time)*64*datarate*1000000000.0*0.05/(packet_size_incast*packetSize*num_sources*8.0);
+    uint32_t num_of_incasts = (app_stop_time-app_start_time)*32*datarate*1000000000.0*0.05/(packet_size_incast*packetSize*num_sources*8.0);
     uint32_t incasts_done = 0;
     double incast_interval = (app_stop_time-app_start_time)/num_of_incasts;
     if(create_incast)
@@ -1201,7 +1296,7 @@ for (int i = 1; i < enterprise_size.size(); i++) {
 	// maintain port number for each host
 	std::unordered_map<uint32_t, uint16_t> portNumder;
 	std::unordered_map<uint32_t, uint16_t> dportNumder;
-	for (uint32_t i = 0; i < node_num; i++){
+	for (uint32_t i = 0; i < tot_nodes; i++){
 		if (n.Get(i)->GetNodeType() == 0)
 			portNumder[i] = 10000; // each host use port number from 10000
 	}
@@ -1228,10 +1323,10 @@ for (int i = 1; i < enterprise_size.size(); i++) {
         flownum += 1;
 		//uint32_t src, dst, pg, maxPacketCount, port;
 		uint32_t src, dst, pg, maxPacketCount, port, dport;
-        src = uint32_t(dis(gen) * 128)+16;
+        src = uint32_t(dis(gen) * 64);
         //src = 1;
         while (true) {
-            dst = uint32_t(dis(gen) * 128)+16;
+            dst = uint32_t(dis(gen) * 64);
             if (dst != src) break;
         }
         NS_ASSERT(dst < 144);
@@ -1277,7 +1372,7 @@ for (int i = 1; i < enterprise_size.size(); i++) {
         		uint32_t dst2 = dst;
         		while (true)
 	        	{
-	            		dst = uint32_t(dis(gen) * 128) + 16;
+	            		dst = uint32_t(dis(gen) * 64) ;
 	           		 	if (dst != dst2) break;
 	       		}
 	        	incasts_done++;
@@ -1287,7 +1382,7 @@ for (int i = 1; i < enterprise_size.size(); i++) {
 	        	{
 	        		while (true)
 	        		 {
-	            		src = uint32_t(dis(gen) * 128) + 16;
+	            		src = uint32_t(dis(gen) * 64) ;
 	           		 	if (dst != src) break;
 	       			 }
 	       			 maxPacketCount= packet_size_incast;
@@ -1317,6 +1412,170 @@ for (int i = 1; i < enterprise_size.size(); i++) {
         //std::cout<<x<<"\n";
         
 	}
+
+	incasts_done = 0;
+	start_time = app_start_time;
+
+	while (start_time<app_stop_time)
+    {
+        flownum += 1;
+		//uint32_t src, dst, pg, maxPacketCount, port;
+		uint32_t src, dst, pg, maxPacketCount, port, dport;
+        src = uint32_t(dis(gen) * 64)+77;
+        //src = 1;
+        while (true) {
+            dst = uint32_t(dis(gen) * 64)+77;
+            if (dst != src) break;
+        }
+        // NS_ASSERT(dst < 144);
+        // NS_ASSERT(src < 144);
+       	pg = 3+(dis(gen)*(qCnt - 8));
+       	//} //priority between 1 & 125, 0, 126 & 127 reserved
+        double flow_size_helper = dis(gen);
+        int start_ind=0, end_ind=enterprise_size.size();
+        auto higher_prob = probs.upper_bound(flow_size_helper);
+        double higher_probability = *(higher_prob);
+        higher_prob--;
+        double lower_probability = *(higher_prob);
+        int higher_size = size_map[higher_probability];
+        int size = size_map[lower_probability];
+        //std::cout<<"Hs "<<higher_size<<"size "<<size<<"\n";
+    	int flow_size = size + (higher_size-size)*((higher_probability - flow_size_helper)/(higher_probability - lower_probability));
+    	//std::cout<<flow_size<<"\n";
+    	int flow_packet_size;
+    	if(flow_size <= packetSize)
+    	{
+    		flow_packet_size = flow_size;
+    		maxPacketCount = 1;
+    	}
+    	else{
+    		flow_packet_size = packetSize;
+    		maxPacketCount = int(flow_size/packetSize)+1;
+    	}
+	
+   
+        if(flownum%1000==0) std::cout<<"New Flow Created Src "<<src<<" Dst "<<dst<<" FlowNum "<<flownum<<"Packets "<<maxPacketCount<<" Priority "<<pg<<"\n";
+		NS_ASSERT(n.Get(src)->GetNodeType() == 0 && n.Get(dst)->GetNodeType() == 0);
+		port = portNumder[src]++; // get a new port number 
+		port = port%65000;
+		if(port<10000) port+= 30000;
+		RdmaClientHelper clientHelper(pg, serverAddress[src], serverAddress[dst], port, 40000+dst, maxPacketCount*flow_packet_size, has_win?(global_t==1?maxBdp:pairBdp[n.Get(src)][n.Get(dst)]):0, global_t==1?maxRtt:pairRtt[n.Get(src)][n.Get(dst)]);
+		ApplicationContainer appCon = clientHelper.Install(n.Get(src));
+		appCon.Start(Seconds(start_time));
+		appCon.Stop(Seconds(app_stop_time));
+		if(create_incast)
+        {
+        	if((uint32_t)((start_time- app_start_time)/(incast_interval))>incasts_done)
+        	{
+        		uint32_t dst2 = dst;
+        		while (true)
+	        	{
+	            		dst = uint32_t(dis(gen) * 64) +77;
+	           		 	if (dst != dst2) break;
+	       		}
+	        	incasts_done++;
+	        	//std::cout<<"Incast done "<<incasts_done<<" \n";
+	        	//dst = uint32_t(dis(gen) * 64);
+	        	for(int k = 0; k < num_sources;k++)
+	        	{
+	        		while (true)
+	        		 {
+	            		src = uint32_t(dis(gen) * 64)+77 ;
+	           		 	if (dst != src) break;
+	       			 }
+	       			 maxPacketCount= packet_size_incast;
+	       			pg = 3+(dis(gen)*(qCnt - 8));
+	       			
+	       			NS_ASSERT(n.Get(src)->GetNodeType() == 0 && n.Get(dst)->GetNodeType() == 0);
+		port = portNumder[src]++; // get a new port number 
+		port = port%65000;
+		if(port<10000) port+= 30000;
+		RdmaClientHelper clientHelper(pg, serverAddress[src], serverAddress[dst], port, 40000+dst, maxPacketCount*packetSize, has_win?(global_t==1?maxBdp:pairBdp[n.Get(src)][n.Get(dst)]):0, global_t==1?maxRtt:pairRtt[n.Get(src)][n.Get(dst)]);
+		ApplicationContainer appCon = clientHelper.Install(n.Get(src));
+		appCon.Start(Seconds(start_time));
+		appCon.Stop(Seconds(app_stop_time));
+	        	}
+	        }
+        }
+        double x;
+        if(poison_distr)
+        {
+        	x = exp_dis(gen);
+        	start_time += x;
+        }
+        else{
+        	x = lognormal_dis(gen) ;
+        	start_time += x;
+        }
+        //std::cout<<x<<"\n";
+        
+	}
+
+	//FLOWS IN SECOND DC
+
+
+	/////INTER DC FLOWS
+
+	start_time = app_start_time;
+	if(inter_dc_traffic)
+	{
+		start_time = app_start_time;
+		int tot_inter = 10;
+		std::set<int> nodes;
+	    //std::cout<<"StartTime "<<start_time<<" App Start "<<app_start_time<<"\n";
+	    for(int inter_flows = 0;inter_flows<tot_inter;inter_flows++)
+	    {
+	        flownum += 1;
+			//uint32_t src, dst, pg, maxPacketCount, port;
+			uint32_t src, dst, pg, maxPacketCount, port, dport;
+	        while (true) {
+	            src = uint32_t(dis(gen) * 64);
+	            if (nodes.find(src)==nodes.end()) {
+	            	nodes.insert(src);
+	            	break;
+	            }
+	        }
+	        //src = 1;
+	        while (true) {
+	            dst = uint32_t(dis(gen) * 64);
+	            if (dst != src && nodes.find(src)==nodes.end()) {
+	            	nodes.insert(dst);
+	            	break;
+	            }
+	        }
+	        // NS_ASSERT(dst < 64);
+	        // NS_ASSERT(src < 64);
+	        if(inter_flows< tot_inter/2)
+	        {
+	        	src += 77;
+	        }
+	        else{
+	        	dst += 77;
+	        }
+	        // NS_ASSERT(dst < 144);
+	        // NS_ASSERT(src < 144);
+	       	pg = 3+(dis(gen)*(qCnt - 8));
+	       	//} //priority between 1 & 125, 0, 126 & 127 reserved
+	        int flow_packet_size = packetSize;
+	    	maxPacketCount = 10000000;
+		
+	   
+	        if(flownum%1000==0) std::cout<<"New Flow Created Src "<<src<<" Dst "<<dst<<" FlowNum "<<flownum<<"Packets "<<maxPacketCount<<" Priority "<<pg<<"\n";
+			NS_ASSERT(n.Get(src)->GetNodeType() == 0 && n.Get(dst)->GetNodeType() == 0);
+			port = portNumder[src]++; // get a new port number 
+			port = port%65000;
+			if(port<10000) port+= 30000;
+			RdmaClientHelper clientHelper(pg, serverAddress[src], serverAddress[dst], port, 40000+dst, maxPacketCount*flow_packet_size, has_win?(global_t==1?maxBdp:pairBdp[n.Get(src)][n.Get(dst)]):0, global_t==1?maxRtt:pairRtt[n.Get(src)][n.Get(dst)]);
+			ApplicationContainer appCon = clientHelper.Install(n.Get(src));
+			appCon.Start(Seconds(start_time));
+			appCon.Stop(Seconds(app_stop_time));
+	        //std::cout<<x<<"\n";
+	        
+		}
+	}
+
+	////////////
+
 	std::cout<<"Number of flows "<<flownum<<"\n";
 	if(create_incast)
 	{

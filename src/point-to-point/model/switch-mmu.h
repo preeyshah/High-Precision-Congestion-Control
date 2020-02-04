@@ -43,6 +43,7 @@ public:
 
 	void PrintStats();
 	void SetSwitch(uint32_t i);
+	void SetGateway();
 
 	bool is_switch;
 	uint32_t sw_id;

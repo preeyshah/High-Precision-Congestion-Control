@@ -294,6 +294,10 @@ int RdmaHw::ReceiveUdp(Ptr<Packet> p, CustomHeader &ch){
 	rxQp->m_milestone_rx = m_ack_interval;
 
 	int x = ReceiverCheckSeq(ch.udp.seq, rxQp, payload_size);
+
+	/*if (ch.udp.seq>=10000000) {
+		std::cout<<"Received at T: "<<Simulator::Now()<<" seq "<<ch.udp.seq<<"\n";
+	}*/
 	if (x == 1 || x == 2){ //generate ACK or NACK
 		qbbHeader seqh;
 		seqh.SetSeq(rxQp->ReceiverNextExpectedSeq);
@@ -565,6 +569,12 @@ Ptr<Packet> RdmaHw::GetNxtPacket(Ptr<RdmaQueuePair> qp){
 }
 
 void RdmaHw::PktSent(Ptr<RdmaQueuePair> qp, Ptr<Packet> pkt, Time interframeGap){
+	/*CustomHeader ch(CustomHeader::L2_Header | CustomHeader::L3_Header | CustomHeader::L4_Header);
+        ch.getInt = 1; // parse INT header
+        pkt->PeekHeader(ch);
+	if (ch.udp.seq>=10000000) {
+		std::cout<<"Sent at T: "<<Simulator::Now()<<" seq "<<ch.udp.seq<<"\n";
+	}*/
 	qp->lastPktSize = pkt->GetSize();
 	UpdateNextAvail(qp, interframeGap, pkt->GetSize());
 }

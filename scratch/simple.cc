@@ -924,11 +924,11 @@ for (int i = 1; i < enterprise_size.size(); i++) {
 	for (uint32_t i = 0; i < link_num; i++)
 	{
 		uint32_t src, dst;
-		std::string data_rate, link_delay;
+		std::string link_delay;
 		double error_rate =  0.0;
 		// double error_rate;
 		// topof >> src >> dst >> data_rate >> link_delay >> error_rate;
-		data_rate = "100Gbps";
+		//data_rate = "100Gbps";
 		link_delay = "0.001ms";
 		uint32_t end_num = 128;
 		if (i < end_num) {
@@ -1224,6 +1224,13 @@ for (int i = 1; i < enterprise_size.size(); i++) {
             dst = uint32_t(dis(gen) * 128)+16;
             if (dst != src) break;
         }
+	//if (flownum==1) {
+	//	src=20;
+	//	dst=40;
+	//}
+	if (maxPacketCount == packet_size_incast) {
+		maxPacketCount +=1;
+	}
         NS_ASSERT(dst < 144);
         NS_ASSERT(src < 144);
        	pg = 3;
@@ -1249,6 +1256,10 @@ for (int i = 1; i < enterprise_size.size(); i++) {
     		flow_packet_size = packetSize;
     		maxPacketCount = int(flow_size/packetSize)+1;
     	}
+	//if (flownum==1) {
+	//	flow_packet_size = packetSize;
+	//	maxPacketCount=10000000;
+	//}
 	
    
         if(flownum%1000==0) std::cout<<"New Flow Created Src "<<src<<" Dst "<<dst<<" FlowNum "<<flownum<<"Packets "<<maxPacketCount<<" Priority "<<pg<<"\n";

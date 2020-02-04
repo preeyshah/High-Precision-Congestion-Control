@@ -29,6 +29,7 @@ namespace ns3 {
 
 		// headroom
 		shared_used_bytes = 0;
+		totalBytes=0;
 		memset(hdrm_bytes, 0, sizeof(hdrm_bytes));
 		memset(ingress_bytes, 0, sizeof(ingress_bytes));
 		memset(paused, 0, sizeof(paused));
@@ -39,7 +40,7 @@ namespace ns3 {
 	void SwitchMmu::PrintStats(){
 		if(is_switch)
 		{
-			std::cout<<"Buffer at "<<sw_id<<" "<<shared_used_bytes<<" Time"<<Simulator::Now()<<" \n";
+			std::cout<<"Buffer at "<<sw_id<<" "<<totalBytes<<" Time"<<Simulator::Now()<<" \n";
 			Simulator::Schedule(MicroSeconds(2),&SwitchMmu::PrintStats, this);
 		}
 		
@@ -78,6 +79,7 @@ namespace ns3 {
 		}
 	}
 	void SwitchMmu::UpdateEgressAdmission(uint32_t port, uint32_t qIndex, uint32_t psize){
+		totalBytes += psize;
 		egress_bytes[port][qIndex] += psize;
 	}
 	void SwitchMmu::RemoveFromIngressAdmission(uint32_t port, uint32_t qIndex, uint32_t psize){
@@ -88,6 +90,8 @@ namespace ns3 {
 		shared_used_bytes -= from_shared;
 	}
 	void SwitchMmu::RemoveFromEgressAdmission(uint32_t port, uint32_t qIndex, uint32_t psize){
+		NS_ASSERT(totalBytes>=psize);
+		totalBytes -= psize;
 		egress_bytes[port][qIndex] -= psize;
 	}
 	bool SwitchMmu::CheckShouldPause(uint32_t port, uint32_t qIndex){

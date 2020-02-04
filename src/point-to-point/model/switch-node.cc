@@ -99,6 +99,7 @@ void SwitchNode::SendToDev(Ptr<Packet>p, CustomHeader &ch){
 		NS_ASSERT_MSG(m_devices[idx]->IsLinkUp(), "The routing table look up should return link that is up");
 
 		// determine the qIndex
+		m_ackHighPrio=true;
 		uint32_t qIndex;
 		if (ch.l3Prot == 0xFF || ch.l3Prot == 0xFE || (m_ackHighPrio && (ch.l3Prot == 0xFD || ch.l3Prot == 0xFC))){  //QCN or PFC or NACK, go highest priority
 			qIndex = 0;

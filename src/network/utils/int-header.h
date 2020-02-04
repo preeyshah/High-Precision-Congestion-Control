@@ -50,9 +50,9 @@ public:
 		bytes = _bytes / (byteUnit * multi);
 		qlen = _qlen / (qlenUnit * multi);
 		switch (_rate){
-			case 25000000000lu:
+			case 10000000000lu:
 				lineRate=0;break;
-			case 50000000000lu:
+			case 40000000000lu:
 				lineRate=1;break;
 			case 100000000000lu:
 				lineRate=2;break;

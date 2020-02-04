@@ -5,19 +5,19 @@ from numpy import sort
 from numpy import array
 filename = sys.argv[1]
 
-# os.system('cat '+filename+' | grep DATA_RATE > temp1')
-# tfile = open('temp1', 'r')
-# filedata = ''
-# for input in tfile:
-# 	filedata += input
+os.system('cat '+filename+' | grep DATA_RATE > temp1')
+tfile = open('temp1', 'r')
+filedata = ''
+for input in tfile:
+	filedata += input
 
-# filedata = filedata.split('\n')
-# dr = filedata[0].split('\t')[-1]
-# datarate = int(dr[0:-4])
-# os.system('rm temp1')
-# print(datarate)
+filedata = filedata.split('\n')
+dr = filedata[0].split('\t')[-1]
+datarate = int(dr[0:-4])
+os.system('rm temp1')
+print(datarate)
 
-datarate = 100.0
+#datarate = 100.0
 
 Incast_size = -1
 os.system('cat '+filename+' | grep \'Incast info\' > temp1')
@@ -47,7 +47,6 @@ else:
 	workload = filedata.split('\t')[-1]
 	if workload[0:2]=='W3':
 		is_w3 = True
-is_w3 = True
 print(is_w3)
 
 # FLOW_SIZE_IN_INCAST
@@ -80,11 +79,14 @@ for i in range(len(filedata)):
 			dst = int((sep[5].split('.'))[1])
 			#print('dst')
 			time = int(((sep[8].split('.'))[0]).split('+')[1])
+			time2 = int(((sep[14].split('.'))[0]).split('+')[1])
 			#print('time')
 			size = int(sep[12])
 			#print('size')
 			ld = 8000
 			ex = 3
+			if False and (time2<1150000000 or time2>1200000000):
+				continue
 			np = int(size/1000)
 			if size < 1000:
 				np = 1
@@ -177,7 +179,7 @@ for i in range(len(medians)):
 		#print(s)
 		# print(len(s))
 
-
+print(nums)
 print("Flows started", end=" ")
 print(started)
 print("Flows completed", end=" ")

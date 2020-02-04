@@ -61,6 +61,7 @@ public:
 
 	// runtime
 	uint32_t shared_used_bytes;
+	uint32_t totalBytes;
 	uint32_t hdrm_bytes[pCnt][qCnt];
 	uint32_t ingress_bytes[pCnt][qCnt];
 	uint32_t paused[pCnt][qCnt];

@@ -53,7 +53,7 @@ public:
 	static TypeId GetTypeId (void);
 	RdmaEgressQueue();
 	Ptr<Packet> DequeueQindex(int qIndex);
-	int GetNextQindex(bool paused[]);
+	int GetNextQindex(bool paused);
 	int GetLastQueue();
 	uint32_t GetNBytes(uint32_t qIndex);
 	uint32_t GetFlowCount(void);
@@ -73,7 +73,7 @@ public:
 class QbbNetDevice : public PointToPointNetDevice 
 {
 public:
-  static const uint32_t qCnt = 8;	// Number of queues/priorities used
+  static const uint32_t qCnt = 35;	// Number of queues/priorities used
   static const uint32_t pCnt = 257;	// Number of ports used
   static const uint32_t fCnt = 128; // Max number of flows on a NIC, for TX and RX respectively. TX+RX=fCnt*2
   static const uint32_t maxHop = 1; // Max hop count in the network. should not exceed 16 
@@ -172,7 +172,7 @@ protected:
   bool m_dynamicth;
   uint32_t m_pausetime;	//< Time for each Pause
   bool m_paused[qCnt];	//< Whether a queue paused
-
+  bool is_paused;
   //qcn
 
   /* RP parameters */

@@ -1,4 +1,5 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
+
 /*
 * Copyright (c) 2006 Georgia Tech Research Corporation, INRIA
 *
@@ -91,10 +92,10 @@ namespace ns3 {
 		}
 		return 0;
 	}
-	int RdmaEgressQueue::GetNextQindex(bool paused[]){
+	int RdmaEgressQueue::GetNextQindex(bool paused){
 		bool found = false;
 		uint32_t qIndex;
-		if (!paused[ack_q_idx] && m_ackQ->GetNPackets() > 0)
+		if (!paused && m_ackQ->GetNPackets() > 0)
 			return -1;
 
 		// no pkt in highest priority queue, do rr for each qp
@@ -102,13 +103,7 @@ namespace ns3 {
 		//std::cout<<"Fcount "<<fcount<<"\n";
 		for (qIndex = 1; qIndex <= fcount; qIndex++){
 			Ptr<RdmaQueuePair> qp = m_qpGrp->Get((qIndex + m_rrlast) % fcount);
-			if (qp->IsFinished()) {
-				m_qpGrp->Finished((qIndex+m_rrlast)%fcount);
-				qIndex-=1;
-				fcount-=1;
-				continue;
-			}
-			if (!paused[qp->m_pg] && qp->GetBytesLeft() > 0 && !qp->IsWinBound()){
+			if (!paused && qp->GetBytesLeft() > 0 && !qp->IsWinBound()){
 				if (m_qpGrp->Get((qIndex + m_rrlast) % fcount)->m_nextAvail.GetTimeStep() > Simulator::Now().GetTimeStep()) //not available now
 					continue;
 				return (qIndex + m_rrlast) % fcount;
@@ -216,7 +211,7 @@ namespace ns3 {
 		for (uint32_t i = 0; i < qCnt; i++){
 			m_paused[i] = false;
 		}
-
+		is_paused = false;
 		m_rdmaEQ = CreateObject<RdmaEgressQueue>();
 		qbbid = k;
 		k++;
@@ -243,7 +238,7 @@ namespace ns3 {
 			std::cout<<"Stats "<<qbbid<<" Time "<<Simulator::Now()<<" ";
 			for(int i=0; i< qCnt;i++)
 			{
-				if(m_paused[i])
+				if(is_paused)
 				{
 					std::cout<<"P-"<<i<<" ";
 				}
@@ -273,7 +268,7 @@ namespace ns3 {
 		if (m_txMachineState == BUSY) return;	// Quit if channel busy
 		Ptr<Packet> p;
 		if (m_node->GetNodeType() == 0){
-			int qIndex = m_rdmaEQ->GetNextQindex(m_paused);
+			int qIndex = m_rdmaEQ->GetNextQindex(is_paused);
 			if (qIndex != -1024){
 				if (qIndex == -1){ // high prio
 					p = m_rdmaEQ->DequeueQindex(qIndex);
@@ -306,7 +301,7 @@ namespace ns3 {
 			}
 			return;
 		}else{   //switch, doesn't care about qcn, just send
-			p = m_queue->DequeueRR(m_paused);		//this is round-robin
+			p = m_queue->DequeueRR(is_paused);		//this is round-robin
 			if (p != 0){
 				m_snifferTrace(p);
 				m_promiscSnifferTrace(p);
@@ -350,8 +345,9 @@ namespace ns3 {
 		QbbNetDevice::Resume(unsigned qIndex)
 	{
 		NS_LOG_FUNCTION(this << qIndex);
-		NS_ASSERT_MSG(m_paused[qIndex], "Must be PAUSEd");
+		//NS_ASSERT_MSG(m_paused[qIndex], "Must be PAUSEd");
 		m_paused[qIndex] = false;
+		is_paused = false;
 		NS_LOG_INFO("Node " << m_node->GetId() << " dev " << m_ifIndex << " queue " << qIndex <<
 			" resumed at " << Simulator::Now().GetSeconds());
 		DequeueAndTransmit();
@@ -386,6 +382,7 @@ namespace ns3 {
 			if (ch.pfc.time > 0){
 				m_tracePfc(1);
 				m_paused[qIndex] = true;
+				is_paused = true;
 			}else{
 				m_tracePfc(0);
 				Resume(qIndex);
@@ -522,8 +519,11 @@ namespace ns3 {
 			// clean the queue
 			for (uint32_t i = 0; i < qCnt; i++)
 				m_paused[i] = false;
+
+			is_paused = false;
+
 			while (1){
-				Ptr<Packet> p = m_queue->DequeueRR(m_paused);
+				Ptr<Packet> p = m_queue->DequeueRR(is_paused);
 				if (p == 0)
 					 break;
 				m_traceDrop(p, m_queue->GetLastQueue());

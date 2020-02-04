@@ -55,7 +55,7 @@ namespace ns3 {
 	{
 	public:
 
-		static const unsigned qCnt = 8;	// Number of queues/priorities used
+		static const unsigned qCnt = 35;	// Number of queues/priorities used
 		static const unsigned pCnt = 64;	// Number of ports used
 
 		static TypeId GetTypeId(void);

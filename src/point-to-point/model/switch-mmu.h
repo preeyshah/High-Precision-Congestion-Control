@@ -11,7 +11,7 @@ class Packet;
 class SwitchMmu: public Object{
 public:
 	static const uint32_t pCnt = 257;	// Number of ports used
-	static const uint32_t qCnt = 8;	// Number of queues/priorities used
+	static const uint32_t qCnt = 35;	// Number of queues/priorities used
 
 	static TypeId GetTypeId (void);
 
@@ -43,6 +43,7 @@ public:
 
 	void PrintStats();
 	void SetSwitch(uint32_t i);
+	void SetGateway();
 
 	bool is_switch;
 	uint32_t sw_id;
@@ -66,6 +67,9 @@ public:
 	uint32_t ingress_bytes[pCnt][qCnt];
 	uint32_t paused[pCnt][qCnt];
 	uint32_t egress_bytes[pCnt][qCnt];
+
+	uint32_t blanket_pause[pCnt];
+	uint32_t ingress_port[pCnt];
 };
 
 } /* namespace ns3 */

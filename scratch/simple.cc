@@ -1166,6 +1166,7 @@ for (int i = 1; i < enterprise_size.size(); i++) {
 	//std::cout<<interarrival<<"in\n";
 	Time interPacketInterval = Seconds(interarrival); //800ns assuming 10Gbps link and 1000 Byte Payload
     std::mt19937 gen(5489U); //Same Seed for all the Simlulations
+    std::mt19937 gen2(5489U); //Same Seed for all the Simlulations
     std::uniform_real_distribution<> dis(0.0, 1.0);
     std::exponential_distribution<double> exp_dis(flows_per_sec);
     double m = -(sigma*sigma/2)-log(flows_per_sec);
@@ -1233,7 +1234,11 @@ for (int i = 1; i < enterprise_size.size(); i++) {
 	}
         NS_ASSERT(dst < 144);
         NS_ASSERT(src < 144);
-       	pg = 3;
+
+       	int qcount = 37;
+	int hqCnt = 24*1024;
+        pg = 3 + (5*qcount + uint32_t(dis(gen2) * ((hqCnt/8) - 5*qcount))) % 4;
+	//pg = 3;
        	//} //priority between 1 & 125, 0, 126 & 127 reserved
         double flow_size_helper = dis(gen);
         int start_ind=0, end_ind=enterprise_size.size();
@@ -1292,7 +1297,7 @@ for (int i = 1; i < enterprise_size.size(); i++) {
 	           		 	if (dst != src) break;
 	       			 }
 	       			 maxPacketCount= packet_size_incast;
-	       			pg = 3;
+        			pg = 3 + (5*qcount + uint32_t(dis(gen2) * ((hqCnt/8) - 5*qcount))) % 4;
 	       			
 	       			NS_ASSERT(n.Get(src)->GetNodeType() == 0 && n.Get(dst)->GetNodeType() == 0);
 		port = portNumder[src]++; // get a new port number 

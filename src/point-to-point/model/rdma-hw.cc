@@ -395,7 +395,7 @@ int RdmaHw::ReceiveAck(Ptr<Packet> p, CustomHeader &ch){
 			qp->Acknowledge(goback_seq);
 		}
 		if (qp->IsFinished()){
-			std::cout<<"Finished flow at "<<qp->sip<<" dst "<<qp->dip<<" in time "<<Simulator::Now()-starting_times[qp->sport]<<" port "<<qp->sport<<" Size "<<qp->m_size<<" Time "<<Simulator::Now()<<" \n";
+			std::cout<<"Finished flow at "<<qp->sip<<" dst "<<qp->dip<<" in time "<<Simulator::Now()-starting_times[qp->sport]<<" port "<<qp->sport<<" Size "<<qp->m_size<<" Time "<<Simulator::Now()<<" qIndex "<<qIndex<<" \n";
 			QpComplete(qp);
 		}
 	}

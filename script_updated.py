@@ -85,6 +85,9 @@ for i in range(len(filedata)):
 			#print('size')
 			ld = 8000
 			ex = 3
+			pgroup = int(sep[16])
+			if int(sys.argv[2]) != pgroup:
+				continue
 			if False and (time2<1150000000 or time2>1200000000):
 				continue
 			np = int(size/1000)

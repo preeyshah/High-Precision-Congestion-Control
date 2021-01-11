@@ -108,15 +108,15 @@ namespace ns3 {
 		{
 			if (!found)
 			{
-				for (qIndex = 1; qIndex <= qCnt; qIndex++)
+				for (qIndex = 0; qIndex <= qCnt - 1; qIndex++)
 				{
-					if (!paused[(qIndex + m_rrlast) % qCnt] && m_queues[(qIndex + m_rrlast) % qCnt]->GetNPackets() > 0)  //round robin
+					if (!paused[(qIndex) % qCnt] && m_queues[(qIndex) % qCnt]->GetNPackets() > 0)  //round robin
 					{
 						found = true;
 						break;
 					}
 				}
-				qIndex = (qIndex + m_rrlast) % qCnt;
+				qIndex = (qIndex) % qCnt;
 			}
 		}
 		if (found)

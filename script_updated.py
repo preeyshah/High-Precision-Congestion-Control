@@ -92,7 +92,7 @@ for i in range(len(filedata)):
 				np = 1
 			if size > 1000:
 				size = 1000
-			if int((src-1)/16)==int((dst-1)/16):
+			if int((src)/16)==int((dst)/16):
 				ld = 4000
 				ex =1
 

@@ -410,6 +410,7 @@ int RdmaHw::ReceiveAck(Ptr<Packet> p, CustomHeader &ch){
 		else
 			qp->snd_nxt -= m_mtu;
 		dev->TriggerTransmit();
+		ChangeRate(qp, m_minRate);
 		//std::cout<<"Nack "<<qp->snd_nxt<<" "<<qp->snd_una<<"\n";
 		//RecoverQueue(qp);
 		return 0;

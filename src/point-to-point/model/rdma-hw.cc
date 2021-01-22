@@ -397,7 +397,8 @@ int RdmaHw::ReceiveAck(Ptr<Packet> p, CustomHeader &ch){
 				qp->Acknowledge(goback_seq);
 			}
 			if (qp->IsFinished()){
-				std::cout<<"Finished flow at "<<qp->sip<<" dst "<<qp->dip<<" in time "<<Simulator::Now()-starting_times[qp->sport]<<" port "<<qp->sport<<" Size "<<qp->m_size<<" Time "<<Simulator::Now()<<" \n";
+				//std::cout<<"Finished flow at "<<qp->sip<<" dst "<<qp->dip<<" in time "<<Simulator::Now()-starting_times[qp->sport]<<" port "<<qp->sport<<" Size "<<qp->m_size<<" Time "<<Simulator::Now()<<" \n";
+				std::cout<<"Finished flow at "<<qp->sip<<" dst "<<qp->dip<<" in time "<<Simulator::Now()-qp->starting_time<<" port "<<qp->sport<<" Size "<<qp->m_size<<" Time "<<Simulator::Now()<<" \n";
 				QpComplete(qp);
 			}
 		}
@@ -408,6 +409,7 @@ int RdmaHw::ReceiveAck(Ptr<Packet> p, CustomHeader &ch){
 			qp->snd_nxt -= qp->m_size;
 		else
 			qp->snd_nxt -= m_mtu;
+		dev->TriggerTransmit();
 		//std::cout<<"Nack "<<qp->snd_nxt<<" "<<qp->snd_una<<"\n";
 		//RecoverQueue(qp);
 		return 0;
@@ -544,8 +546,8 @@ Ptr<Packet> RdmaHw::GetNxtPacket(Ptr<RdmaQueuePair> qp){
 	SeqTsHeader seqTs;
 	if(qp->snd_nxt==0)
 	{
-		std::cout<<"Started flow "<<qp->sip<<" dst "<<qp->dip<<" port "<<qp->sport<<" Time "<<Simulator::Now()<<" Size "<<qp->m_size<<"\n";
-		starting_times[qp->sport] = Simulator::Now();
+		//std::cout<<"Started flow "<<qp->sip<<" dst "<<qp->dip<<" port "<<qp->sport<<" Time "<<Simulator::Now()<<" Size "<<qp->m_size<<"\n";
+		//starting_times[qp->sport] = Simulator::Now();
 	}
 	seqTs.SetSeq (qp->snd_nxt);
 	seqTs.SetPG (qp->m_pg);

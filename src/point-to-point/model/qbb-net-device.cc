@@ -485,6 +485,8 @@ namespace ns3 {
 
    void QbbNetDevice::NewQp(Ptr<RdmaQueuePair> qp){
 	   qp->m_nextAvail = Simulator::Now();
+	   std::cout<<"Started flow "<<qp->sip<<" dst "<<qp->dip<<" port "<<qp->sport<<" Time "<<Simulator::Now()<<" Size "<<qp->m_size<<"\n";
+	   qp->starting_time = Simulator::Now();
 	   DequeueAndTransmit();
    }
    void QbbNetDevice::ReassignedQp(Ptr<RdmaQueuePair> qp){

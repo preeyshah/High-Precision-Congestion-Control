@@ -94,7 +94,8 @@ namespace ns3 {
 	int RdmaEgressQueue::GetNextQindex(bool paused[]){
 		bool found = false;
 		uint32_t qIndex;
-		if (!paused[ack_q_idx] && m_ackQ->GetNPackets() > 0)
+		//if (!paused[ack_q_idx] && m_ackQ->GetNPackets() > 0)
+		if (m_ackQ->GetNPackets() > 0)
 			return -1;
 
 		// no pkt in highest priority queue, do rr for each qp
@@ -484,6 +485,8 @@ namespace ns3 {
 
    void QbbNetDevice::NewQp(Ptr<RdmaQueuePair> qp){
 	   qp->m_nextAvail = Simulator::Now();
+	   std::cout<<"Started flow "<<qp->sip<<" dst "<<qp->dip<<" port "<<qp->sport<<" Time "<<Simulator::Now()<<" Size "<<qp->m_size<<"\n";
+	   qp->starting_time = Simulator::Now();
 	   DequeueAndTransmit();
    }
    void QbbNetDevice::ReassignedQp(Ptr<RdmaQueuePair> qp){
